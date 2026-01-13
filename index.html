@@ -2,15 +2,88 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>국내 마라톤 평점 사이트</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025 JTBC 마라톤 리뷰 | Didim</title>
+    <style>
+        body { font-family: 'Pretendard', sans-serif; line-height: 1.6; background-color: #f0f2f5; color: #1c1e21; margin: 0; padding: 0; }
+        header { background: #ffffff; color: #e91e63; padding: 1.5rem; text-align: center; border-bottom: 2px solid #e91e63; }
+        .container { max-width: 600px; margin: 2rem auto; background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        
+        .marathon-header { text-align: center; margin-bottom: 2rem; }
+        .marathon-header h2 { color: #e91e63; margin-bottom: 0.5rem; }
+        .badge { background: #ffebee; color: #e91e63; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+
+        .review-form { display: flex; flex-direction: column; gap: 1.5rem; }
+        .rating-group { text-align: center; }
+        .stars { font-size: 2rem; color: #ddd; cursor: pointer; }
+        .stars span:hover, .stars span.active { color: #f1c40f; }
+
+        label { font-weight: bold; display: block; margin-bottom: 0.5rem; }
+        textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; resize: none; font-size: 1rem; box-sizing: border-box; }
+        
+        button { background: #e91e63; color: white; border: none; padding: 1rem; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+        button:hover { background: #c2185b; }
+
+        .footer { text-align: center; margin-top: 2rem; color: #888; font-size: 0.9rem; }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>🏃‍♂️ 국내 마라톤 대회 평점 사이트</h1>
-        <p>전국의 마라톤 대회를 직접 평가해 보세요!</p>
-    </header>
-    <main>
-        <p>사이트가 정상적으로 배포되었습니다. 현재 데이터를 연결 중입니다.</p>
-    </main>
+
+<header>
+    <h1>Didim's Marathon Rating</h1>
+</header>
+
+<div class="container">
+    <div class="marathon-header">
+        <span class="badge">REVIEW TARGET</span>
+        <h2>2025 JTBC 서울 마라톤</h2>
+        <p>나의 레이스는 어땠나요? 생생한 후기를 남겨주세요!</p>
+    </div>
+
+    <div class="review-form">
+        <div class="rating-group">
+            <label>종합 별점</label>
+            <div class="stars" id="star-rating">
+                <span onclick="setRating(1)">★</span>
+                <span onclick="setRating(2)">★</span>
+                <span onclick="setRating(3)">★</span>
+                <span onclick="setRating(4)">★</span>
+                <span onclick="setRating(5)">★</span>
+            </div>
+        </div>
+
+        <div>
+            <label for="comment">대회 총평</label>
+            <textarea id="comment" rows="4" placeholder="코스, 응원, 보급 등 좋았던 점이나 아쉬웠던 점을 적어주세요."></textarea>
+        </div>
+
+        <button onclick="submitReview()">리뷰 등록하기</button>
+    </div>
+
+    <div class="footer">
+        <p>하원님의 2026년 풀코스 완주를 응원합니다! 🏃‍♂️</p>
+    </div>
+</div>
+
+<script>
+    let currentRating = 0;
+    function setRating(n) {
+        currentRating = n;
+        const stars = document.querySelectorAll('.stars span');
+        stars.forEach((star, index) => {
+            star.style.color = index < n ? '#f1c40f' : '#ddd';
+        });
+    }
+
+    function submitReview() {
+        if(currentRating === 0) {
+            alert('별점을 선택해주세요!');
+            return;
+        }
+        alert(`2025 JTBC 마라톤 리뷰가 성공적으로 접수되었습니다!\n별점: ${currentRating}점\n후기: ${document.getElementById('comment').value}`);
+        // 추후 여기서 Supabase에 데이터를 저장하게 됩니다.
+    }
+</script>
+
 </body>
 </html>
