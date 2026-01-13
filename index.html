@@ -134,17 +134,27 @@
 // 리뷰 목록을 그려주는 별도 함수
 function renderReviewList(reviews) {
     const display = document.getElementById('reviews-display');
-    // 최신순 정렬 후 표시
+    
+    // 최신순 정렬 (최신 리뷰가 위로)
     const html = reviews.reverse().map(rev => `
         <div class="review-card">
-            <strong>⭐ 총점: ${rev.rating_total}</strong>
-            <p style="font-size:0.8rem; color:#888;">
-                🛣️${rev.rating_course} 🚩${rev.rating_organize} 🥤${rev.rating_supply} 🎁${rev.rating_souvenir} 💰${rev.rating_cost}
+            <div style="margin-bottom: 10px;">
+                <strong style="font-size: 1.1rem; color: #e91e63;">⭐ 총점: ${rev.rating_total}</strong>
+            </div>
+            <p style="font-size: 0.85rem; color: #555; margin: 8px 0; line-height: 1.5;">
+                <span style="margin-right: 8px;">🛣️ 코스: ${rev.rating_course}</span>
+                <span style="margin-right: 8px;">🚩 운영: ${rev.rating_organize}</span>
+                <span style="margin-right: 8px;">🥤 보급: ${rev.rating_supply}</span>
+                <span style="margin-right: 8px;">🎁 기념품: ${rev.rating_souvenir}</span>
+                <span>💰 가성비: ${rev.rating_cost}</span>
             </p>
-            <p>${rev.comment || '만족스러운 레이스였습니다!'}</p>
+            <div style="margin-top: 10px; border-top: 1px dashed #eee; padding-top: 10px; color: #333;">
+                ${rev.comment || '만족스러운 레이스였습니다!'}
+            </div>
         </div>
     `).join('');
-    display.innerHTML = '<h3>최근 리뷰 목록</h3>' + html;
+    
+    display.innerHTML = '<h3 style="margin-top: 30px;">💬 최근 리뷰 목록</h3>' + html;
 }
 
     // 날씨/달력 로직 (생략 - 이전과 동일하게 추가)
