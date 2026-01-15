@@ -7,31 +7,41 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --main-color: #e91e63; --bg-color: #f0f2f5; }
-        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; padding: 0; }
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; padding: 0; line-height: 1.6; }
         
-        /* 헤더 및 위젯 설정 */
-        header { background: white; padding: 2rem; text-align: center; border-bottom: 2px solid var(--main-color); position: relative; }
+        /* 헤더 & 위젯 */
+        header { background: white; padding: 2rem 1rem; text-align: center; border-bottom: 2px solid var(--main-color); position: relative; }
         .top-widget { position: absolute; top: 10px; right: 20px; background: #fff; padding: 8px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); font-size: 0.75rem; width: 140px; }
-        
+        .calendar-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+        .calendar-table th { font-size: 0.6rem; color: #888; }
+        .calendar-table td { text-align: center; padding: 1px; }
+        .today { background: var(--main-color); color: white; border-radius: 50%; }
+
+        /* 상단 내비게이션 */
+        .nav-container { background: white; border-bottom: 1px solid #eee; display: flex; justify-content: center; padding: 10px 0; gap: 10px; flex-wrap: wrap; }
+        .nav-item { text-decoration: none; color: #666; font-size: 0.9rem; font-weight: 600; padding: 8px 18px; border-radius: 25px; transition: all 0.3s; border: 1px solid transparent; }
+        .nav-item:hover { background-color: #ffebee; color: var(--main-color); }
+        .nav-item.active { background-color: var(--main-color); color: white; box-shadow: 0 4px 10px rgba(233, 30, 99, 0.3); }
+
         .container { max-width: 700px; margin: 2rem auto; padding: 0 1rem; }
         
-        /* 평균값 요약 대시보드 */
+        /* 대시보드 */
         .dashboard { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; margin-bottom: 2rem; }
-        .avg-total { font-size: 3rem; font-weight: bold; color: var(--main-color); margin: 0.5rem 0; }
-        .avg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 1rem; }
-        .avg-item { background: #fff5f7; padding: 10px; border-radius: 8px; font-size: 0.85rem; }
+        .avg-total { font-size: 3.5rem; font-weight: bold; color: var(--main-color); margin: 0.5rem 0; }
+        .avg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-top: 1.5rem; }
+        .avg-item { background: #fff5f7; padding: 12px; border-radius: 10px; font-size: 0.85rem; color: #555; }
 
-        /* 평점 매기기 토글 버튼 */
-        .toggle-btn { width: 100%; background: var(--main-color); color: white; border: none; padding: 1rem; border-radius: 10px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-bottom: 1.5rem; }
-
-        /* 평점 매기기 폼 (기본 숨김) */
+        /* 토글 버튼 & 폼 */
+        .toggle-btn { width: 100%; background: var(--main-color); color: white; border: none; padding: 1.2rem; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-bottom: 1.5rem; transition: transform 0.2s; }
+        .toggle-btn:active { transform: scale(0.98); }
         #rating-form { display: none; background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 2rem; }
         
-        /* 기존 스타일 유지 */
         .rating-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
         .stars { font-size: 1.5rem; color: #ddd; cursor: pointer; }
-        textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-top: 1rem; box-sizing: border-box; }
-        .review-card { background: white; padding: 1.2rem; border-radius: 12px; margin-bottom: 1rem; border-left: 5px solid var(--main-color); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-top: 1rem; box-sizing: border-box; font-family: inherit; }
+        
+        /* 리뷰 카드 */
+        .review-card { background: white; padding: 1.5rem; border-radius: 15px; margin-bottom: 1rem; border-left: 6px solid var(--main-color); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
@@ -40,14 +50,26 @@
     <h1>Didim's Marathon</h1>
     <p>2026년 목표: 1,000km 달리기 & 풀코스 완주 🏃‍♂️</p>
     <div class="top-widget">
-        <div id="weather" style="font-weight:bold; color:var(--main-color); margin-bottom:5px;">날씨 확인 중...</div>
-        <div id="calendar" style="font-size:0.7rem;"></div>
+        <div id="weather" style="font-weight:bold; color:var(--main-color); margin-bottom:5px;">날씨 불러오는 중...</div>
+        <table class="calendar-table">
+            <thead><tr><th>일</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th></tr></thead>
+            <tbody id="calendar-body"></tbody>
+        </table>
     </div>
 </header>
 
+<nav class="nav-container">
+    <a href="index.html" class="nav-item active">홈</a>
+    <a href="#" class="nav-item">메뉴A</a>
+    <a href="#" class="nav-item">메뉴B</a>
+    <a href="#" class="nav-item">메뉴C</a>
+    <a href="#" class="nav-item">메뉴D</a>
+    <a href="#" class="nav-item">메뉴E</a>
+</nav>
+
 <div class="container">
     <div class="dashboard">
-        <span style="font-weight:bold; color:#666;">2025 JTBC 마라톤 평균 평점</span>
+        <span style="font-weight:bold; color:#888;">2025 JTBC 마라톤 평균 평점</span>
         <div class="avg-total" id="avg-total">0.0</div>
         <div class="avg-grid">
             <div class="avg-item">🛣️ 코스: <span id="avg-course">0</span></div>
@@ -61,147 +83,121 @@
     <button class="toggle-btn" onclick="toggleForm()">✍️ 이 대회 평점 남기기</button>
 
     <div id="rating-form">
-        <h3 style="margin-top:0;">대회 상세 평가</h3>
-        <div id="rating-items">
-            <div class="rating-item"><span>⭐ 종합</span><div class="stars" data-category="total"><span onclick="setRating('total',1)">★</span><span onclick="setRating('total',2)">★</span><span onclick="setRating('total',3)">★</span><span onclick="setRating('total',4)">★</span><span onclick="setRating('total',5)">★</span></div></div>
-            <div class="rating-item"><span>🛣️ 코스</span><div class="stars" data-category="course"><span onclick="setRating('course',1)">★</span><span onclick="setRating('course',2)">★</span><span onclick="setRating('course',3)">★</span><span onclick="setRating('course',4)">★</span><span onclick="setRating('course',5)">★</span></div></div>
-            <div class="rating-item"><span>🚩 운영</span><div class="stars" data-category="organize"><span onclick="setRating('organize',1)">★</span><span onclick="setRating('organize',2)">★</span><span onclick="setRating('organize',3)">★</span><span onclick="setRating('organize',4)">★</span><span onclick="setRating('organize',5)">★</span></div></div>
-            <div class="rating-item"><span>🥤 보급</span><div class="stars" data-category="supply"><span onclick="setRating('supply',1)">★</span><span onclick="setRating('supply',2)">★</span><span onclick="setRating('supply',3)">★</span><span onclick="setRating('supply',4)">★</span><span onclick="setRating('supply',5)">★</span></div></div>
-            <div class="rating-item"><span>🎁 기념품</span><div class="stars" data-category="souvenir"><span onclick="setRating('souvenir',1)">★</span><span onclick="setRating('souvenir',2)">★</span><span onclick="setRating('souvenir',3)">★</span><span onclick="setRating('souvenir',4)">★</span><span onclick="setRating('souvenir',5)">★</span></div></div>
-            <div class="rating-item"><span>💰 가성비</span><div class="stars" data-category="cost"><span onclick="setRating('cost',1)">★</span><span onclick="setRating('cost',2)">★</span><span onclick="setRating('cost',3)">★</span><span onclick="setRating('cost',4)">★</span><span onclick="setRating('cost',5)">★</span></div></div>
+        <h3 style="margin-top:0; color:var(--main-color);">대회 상세 평가</h3>
+        <div class="rating-item" style="border-bottom: 2px solid #f9f9f9; padding-bottom: 10px; margin-bottom: 15px;">
+            <span style="font-weight:bold;">⭐ 종합 만족도</span>
+            <div class="stars" data-category="total">
+                <span onclick="setRating('total',1)">★</span><span onclick="setRating('total',2)">★</span><span onclick="setRating('total',3)">★</span><span onclick="setRating('total',4)">★</span><span onclick="setRating('total',5)">★</span>
+            </div>
         </div>
-        <textarea id="comment" rows="3" placeholder="생생한 후기를 남겨주세요."></textarea>
-        <button onclick="submitReview()" style="width:100%; padding:12px; background:#333; color:white; border:none; border-radius:8px; margin-top:10px;">등록하기</button>
+        <div class="rating-item"><span>🛣️ 코스</span><div class="stars" data-category="course"><span onclick="setRating('course',1)">★</span><span onclick="setRating('course',2)">★</span><span onclick="setRating('course',3)">★</span><span onclick="setRating('course',4)">★</span><span onclick="setRating('course',5)">★</span></div></div>
+        <div class="rating-item"><span>🚩 운영</span><div class="stars" data-category="organize"><span onclick="setRating('organize',1)">★</span><span onclick="setRating('organize',2)">★</span><span onclick="setRating('organize',3)">★</span><span onclick="setRating('organize',4)">★</span><span onclick="setRating('organize',5)">★</span></div></div>
+        <div class="rating-item"><span>🥤 보급</span><div class="stars" data-category="supply"><span onclick="setRating('supply',1)">★</span><span onclick="setRating('supply',2)">★</span><span onclick="setRating('supply',3)">★</span><span onclick="setRating('supply',4)">★</span><span onclick="setRating('supply',5)">★</span></div></div>
+        <div class="rating-item"><span>🎁 기념품</span><div class="stars" data-category="souvenir"><span onclick="setRating('souvenir',1)">★</span><span onclick="setRating('souvenir',2)">★</span><span onclick="setRating('souvenir',3)">★</span><span onclick="setRating('souvenir',4)">★</span><span onclick="setRating('souvenir',5)">★</span></div></div>
+        <div class="rating-item"><span>💰 가성비</span><div class="stars" data-category="cost"><span onclick="setRating('cost',1)">★</span><span onclick="setRating('cost',2)">★</span><span onclick="setRating('cost',3)">★</span><span onclick="setRating('cost',4)">★</span><span onclick="setRating('cost',5)">★</span></div></div>
+        
+        <textarea id="comment" rows="3" placeholder="마라토너들에게 도움이 될 생생한 후기를 남겨주세요."></textarea>
+        <button onclick="submitReview()" style="width:100%; padding:15px; background:#333; color:white; border:none; border-radius:10px; margin-top:15px; font-weight:bold; cursor:pointer;">리뷰 등록하기</button>
     </div>
 
-    <div id="reviews-display"></div>
+    <div id="reviews-display">
+        <h3 style="margin-bottom:1.5rem;">💬 최근 리뷰 목록</h3>
+        <div id="reviews-list">불러오는 중...</div>
+    </div>
 </div>
 
 <script>
-    // 본인의 정보로 채워주세요
-    const SUPABASE_URL = 'https://qnnxsdhtzysbnjdlptpc.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_lp-ODYK9ZFOXLWHQrX54kg_8UgNOWYg';
+    // ⚠️ 개인 정보를 입력하세요
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+    const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
     const WEATHER_KEY = 'YOUR_OPENWEATHER_KEY';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let ratings = { total: 0, course: 0, organize: 0, supply: 0, souvenir: 0, cost: 0 };
 
-    // 폼 보이기/숨기기 토글
     function toggleForm() {
         const form = document.getElementById('rating-form');
         form.style.display = form.style.display === 'block' ? 'none' : 'block';
     }
 
-    // 데이터 가져오기 및 평균 계산
-    async function loadData() {
-    console.log("데이터 불러오기 시작...");
-    
-    // 1. Supabase에서 모든 리뷰 데이터 가져오기
-    const { data, error } = await _supabase
-        .from('reviews')
-        .select('*');
-
-    if (error) {
-        console.error('데이터 로드 실패:', error.message);
-        return;
-    }
-
-    if (!data || data.length === 0) {
-        console.log("아직 저장된 데이터가 없습니다.");
-        return;
-    }
-
-    console.log(`총 ${data.length}개의 데이터를 찾았습니다.`);
-
-    // 2. 평균 계산 로직 (소수점 1자리까지)
-    const calculateAvg = (field) => {
-        const total = data.reduce((acc, cur) => acc + (cur[field] || 0), 0);
-        return (total / data.length).toFixed(1);
-    };
-
-    // 3. 화면 업데이트 (HTML의 ID와 일치해야 합니다)
-    document.getElementById('avg-total').innerText = calculateAvg('rating_total');
-    document.getElementById('avg-course').innerText = calculateAvg('rating_course');
-    document.getElementById('avg-organize').innerText = calculateAvg('rating_organize');
-    document.getElementById('avg-supply').innerText = calculateAvg('rating_supply');
-    document.getElementById('avg-souvenir').innerText = calculateAvg('rating_souvenir');
-    document.getElementById('avg-cost').innerText = calculateAvg('rating_cost');
-
-    // 4. 최근 리뷰 목록 표시
-    renderReviewList(data);
-}
-
-// 리뷰 목록을 그려주는 별도 함수
-function renderReviewList(reviews) {
-    const display = document.getElementById('reviews-display');
-    
-    // 최신순 정렬 (최신 리뷰가 위로)
-    const html = reviews.reverse().map(rev => `
-        <div class="review-card">
-            <div style="margin-bottom: 10px;">
-                <strong style="font-size: 1.1rem; color: #e91e63;">⭐ 총점: ${rev.rating_total}</strong>
-            </div>
-            <p style="font-size: 0.85rem; color: #555; margin: 8px 0; line-height: 1.5;">
-                <span style="margin-right: 8px;">🛣️ 코스: ${rev.rating_course}</span>
-                <span style="margin-right: 8px;">🚩 운영: ${rev.rating_organize}</span>
-                <span style="margin-right: 8px;">🥤 보급: ${rev.rating_supply}</span>
-                <span style="margin-right: 8px;">🎁 기념품: ${rev.rating_souvenir}</span>
-                <span>💰 가성비: ${rev.rating_cost}</span>
-            </p>
-            <div style="margin-top: 10px; border-top: 1px dashed #eee; padding-top: 10px; color: #333;">
-                ${rev.comment || '만족스러운 레이스였습니다!'}
-            </div>
-        </div>
-    `).join('');
-    
-    display.innerHTML = '<h3 style="margin-top: 30px;">💬 최근 리뷰 목록</h3>' + html;
-}
-
-    // 날씨/달력 로직 (생략 - 이전과 동일하게 추가)
-    
     function setRating(cat, n) {
         ratings[cat] = n;
         document.querySelectorAll(`.stars[data-category="${cat}"] span`).forEach((s, i) => s.style.color = i < n ? '#f1c40f' : '#ddd');
     }
-async function submitReview() {
-    console.log("등록 시도 중..."); // 디버깅용 메시지
 
-    try {
-        // 1. 모든 항목에 별점이 찍혔는지 확인
-        if (Object.values(ratings).some(v => v === 0)) {
-            alert('종합 만족도를 포함한 모든 별점을 선택해 주세요!');
-            return;
-        }
+    async function loadData() {
+        const { data, error } = await _supabase.from('reviews').select('*').order('created_at', { ascending: false });
+        if (error || !data) return;
 
-        const commentText = document.getElementById('comment').value;
+        // 평균 계산 로직
+        const avg = (field) => data.length ? (data.reduce((acc, cur) => acc + (cur[field] || 0), 0) / data.length).toFixed(1) : "0.0";
+        
+        document.getElementById('avg-total').innerText = avg('rating_total');
+        document.getElementById('avg-course').innerText = avg('rating_course');
+        document.getElementById('avg-organize').innerText = avg('rating_organize');
+        document.getElementById('avg-supply').innerText = avg('rating_supply');
+        document.getElementById('avg-souvenir').innerText = avg('rating_souvenir');
+        document.getElementById('avg-cost').innerText = avg('rating_cost');
 
-        // 2. Supabase 데이터 삽입 (컬럼명이 DB와 똑같아야 합니다!)
-        const { data, error } = await _supabase.from('reviews').insert([{
-            marathon_name: '2025 JTBC 서울 마라톤',
-            rating_total: ratings.total,      // image_62dec3.png 기준
-            rating_course: ratings.course,
-            rating_organize: ratings.organize,
-            rating_supply: ratings.supply,
-            rating_souvenir: ratings.souvenir,
-            rating_cost: ratings.cost,
-            comment: commentText
-        }]);
-
-        // 3. 결과 처리
-        if (error) {
-            console.error('DB 저장 에러:', error);
-            alert('저장 실패: ' + error.message); // 어떤 이유로 안 되는지 알려줍니다.
-        } else {
-            alert('리뷰가 성공적으로 저장되었습니다! 🏃‍♂️');
-            location.reload(); // 성공 시 페이지 새로고침하여 리스트 갱신
-        }
-    } catch (e) {
-        console.error('시스템 오류:', e);
-        alert('알 수 없는 오류가 발생했습니다: ' + e.message);
+        // 리뷰 목록 렌더링 (아이콘 + 텍스트 라벨 포함)
+        const list = document.getElementById('reviews-list');
+        list.innerHTML = data.map(rev => `
+            <div class="review-card">
+                <strong style="font-size:1.1rem; color:var(--main-color);">⭐ 총점: ${rev.rating_total}</strong>
+                <p style="font-size:0.85rem; color:#555; margin:10px 0;">
+                    <span>🛣️ 코스: ${rev.rating_course}</span> | <span>🚩 운영: ${rev.rating_organize}</span> | 
+                    <span>🥤 보급: ${rev.rating_supply}</span> | <span>🎁 기념품: ${rev.rating_souvenir}</span> | 
+                    <span>💰 가성비: ${rev.rating_cost}</span>
+                </p>
+                <div style="border-top:1px dashed #eee; padding-top:10px; margin-top:10px;">${rev.comment || '만족스러운 레이스였습니다!'}</div>
+            </div>
+        `).join('') || '<p>등록된 리뷰가 없습니다.</p>';
     }
-}
 
-    window.onload = loadData;
+    async function submitReview() {
+        if (Object.values(ratings).some(v => v === 0)) return alert('모든 별점을 선택해주세요!');
+        const { error } = await _supabase.from('reviews').insert([{
+            marathon_name: '2025 JTBC 서울 마라톤',
+            rating_total: ratings.total, rating_course: ratings.course, rating_organize: ratings.organize,
+            rating_supply: ratings.supply, rating_souvenir: ratings.souvenir, rating_cost: ratings.cost,
+            comment: document.getElementById('comment').value
+        }]);
+        if (error) alert('저장 실패: ' + error.message);
+        else { alert('성공적으로 저장되었습니다!'); location.reload(); }
+    }
+
+    async function fetchWeather() {
+        try {
+            const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Seoul&appid=${WEATHER_KEY}&units=metric&lang=kr`);
+            const data = await res.json();
+            document.getElementById('weather').innerHTML = `🌡️ ${Math.round(data.main.temp)}°C | ${data.weather[0].description}`;
+        } catch (e) { document.getElementById('weather').innerText = '날씨 정보 미제공'; }
+    }
+
+    function generateCalendar() {
+        const now = new Date(); const year = now.getFullYear(); const month = now.getMonth(); const today = now.getDate();
+        const firstDay = new Date(year, month, 1).getDay(); const lastDate = new Date(year, month + 1, 0).getDate();
+        const tbody = document.getElementById('calendar-body');
+        let date = 1;
+        for (let i = 0; i < 6; i++) {
+            let row = document.createElement('tr');
+            for (let j = 0; j < 7; j++) {
+                let cell = document.createElement('td');
+                if (i === 0 && j < firstDay) cell.innerText = "";
+                else if (date > lastDate) break;
+                else {
+                    cell.innerText = date;
+                    if (date === today) cell.className = "today";
+                    date++;
+                }
+                row.appendChild(cell);
+            }
+            tbody.appendChild(row);
+            if (date > lastDate) break;
+        }
+    }
+
+    window.onload = () => { loadData(); fetchWeather(); generateCalendar(); };
 </script>
 </body>
 </html>
