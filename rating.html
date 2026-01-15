@@ -3,108 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>마라톤 평점 대시보드 | Didim</title>
+    <title>Didim | 대회평점</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        /* index.html과 동일한 nav 스타일 유지 */
         :root { --main-color: #e91e63; --bg-color: #f0f2f5; }
-        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; padding: 0; line-height: 1.6; }
-        
-        /* 헤더 & 위젯 */
-        header { background: white; padding: 2rem 1rem; text-align: center; border-bottom: 2px solid var(--main-color); position: relative; }
-        .top-widget { position: absolute; top: 10px; right: 20px; background: #fff; padding: 8px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); font-size: 0.75rem; width: 140px; }
-        .calendar-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
-        .calendar-table th { font-size: 0.6rem; color: #888; }
-        .calendar-table td { text-align: center; padding: 1px; }
-        .today { background: var(--main-color); color: white; border-radius: 50%; }
-
-        /* 상단 내비게이션 */
-        .nav-container { background: white; border-bottom: 1px solid #eee; display: flex; justify-content: center; padding: 10px 0; gap: 10px; flex-wrap: wrap; }
-        .nav-item { text-decoration: none; color: #666; font-size: 0.9rem; font-weight: 600; padding: 8px 18px; border-radius: 25px; transition: all 0.3s; border: 1px solid transparent; }
-        .nav-item:hover { background-color: #ffebee; color: var(--main-color); }
-        .nav-item.active { background-color: var(--main-color); color: white; box-shadow: 0 4px 10px rgba(233, 30, 99, 0.3); }
-
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; }
+        .nav-container { background: white; border-bottom: 1px solid #eee; display: flex; justify-content: center; padding: 12px 0; gap: 15px; position: sticky; top: 0; z-index: 100; }
+        .nav-item { text-decoration: none; color: #666; font-size: 0.95rem; font-weight: 600; padding: 10px 20px; border-radius: 25px; }
+        .nav-item.active { background: var(--main-color); color: white; }
         .container { max-width: 700px; margin: 2rem auto; padding: 0 1rem; }
-        
-        /* 대시보드 */
-        .dashboard { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; margin-bottom: 2rem; }
-        .avg-total { font-size: 3.5rem; font-weight: bold; color: var(--main-color); margin: 0.5rem 0; }
-        .avg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-top: 1.5rem; }
-        .avg-item { background: #fff5f7; padding: 12px; border-radius: 10px; font-size: 0.85rem; color: #555; }
-
-        /* 토글 버튼 & 폼 */
-        .toggle-btn { width: 100%; background: var(--main-color); color: white; border: none; padding: 1.2rem; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-bottom: 1.5rem; transition: transform 0.2s; }
-        .toggle-btn:active { transform: scale(0.98); }
-        #rating-form { display: none; background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 2rem; }
-        
-        .rating-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-        .stars { font-size: 1.5rem; color: #ddd; cursor: pointer; }
-        textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-top: 1rem; box-sizing: border-box; font-family: inherit; }
-        
-        /* 리뷰 카드 */
-        .review-card { background: white; padding: 1.5rem; border-radius: 15px; margin-bottom: 1rem; border-left: 6px solid var(--main-color); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .dashboard { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; }
+        .avg-total { font-size: 3rem; font-weight: bold; color: var(--main-color); }
+        .toggle-btn { width: 100%; background: var(--main-color); color: white; border: none; padding: 1.2rem; border-radius: 12px; font-weight: bold; cursor: pointer; margin: 1.5rem 0; }
+        #rating-form { display: none; background: white; padding: 2rem; border-radius: 15px; margin-bottom: 2rem; }
+        .review-card { background: white; padding: 1.2rem; border-radius: 12px; margin-bottom: 1rem; border-left: 5px solid var(--main-color); }
     </style>
 </head>
 <body>
-
-<header>
-    <h1>Didim's Marathon</h1>
-    <p>2026년 목표: 1,000km 달리기 & 풀코스 완주 🏃‍♂️</p>
-    <div class="top-widget">
-        <div id="weather" style="font-weight:bold; color:var(--main-color); margin-bottom:5px;">날씨 불러오는 중...</div>
-        <table class="calendar-table">
-            <thead><tr><th>일</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th></tr></thead>
-            <tbody id="calendar-body"></tbody>
-        </table>
-    </div>
-</header>
-
-<nav class="nav-container">
-    <a href="index.html" class="nav-item active">홈</a>
-    <a href="schedule.html" class="nav-item">마라톤 일정</a> 
-    <a href="#" class="nav-item">메뉴B</a>
-    <a href="#" class="nav-item">메뉴C</a>
-    <a href="#" class="nav-item">메뉴D</a>
-    <a href="#" class="nav-item">메뉴E</a>
-</nav>
-
-<div class="container">
-    <div class="dashboard">
-        <span style="font-weight:bold; color:#888;">2025 JTBC 마라톤 평균 평점</span>
-        <div class="avg-total" id="avg-total">0.0</div>
-        <div class="avg-grid">
-            <div class="avg-item">🛣️ 코스: <span id="avg-course">0</span></div>
-            <div class="avg-item">🚩 운영: <span id="avg-organize">0</span></div>
-            <div class="avg-item">🥤 보급: <span id="avg-supply">0</span></div>
-            <div class="avg-item">🎁 기념품: <span id="avg-souvenir">0</span></div>
-            <div class="avg-item">💰 가성비: <span id="avg-cost">0</span></div>
+    <nav class="nav-container">
+        <a href="index.html" class="nav-item">홈</a>
+        <a href="rating.html" class="nav-item active">대회평점</a>
+        <a href="schedule.html" class="nav-item">대회일정</a>
+        <a href="#" class="nav-item">메뉴D</a>
+        <a href="#" class="nav-item">메뉴E</a>
+        <a href="#" class="nav-item">메뉴F</a>
+    </nav>
+    <div class="container">
+        <div class="dashboard">
+            <span style="color:#888;">실시간 평균 평점</span>
+            <div class="avg-total" id="avg-total">0.0</div>
         </div>
-    </div>
-
-    <button class="toggle-btn" onclick="toggleForm()">✍️ 이 대회 평점 남기기</button>
-
-    <div id="rating-form">
-        <h3 style="margin-top:0; color:var(--main-color);">대회 상세 평가</h3>
-        <div class="rating-item" style="border-bottom: 2px solid #f9f9f9; padding-bottom: 10px; margin-bottom: 15px;">
-            <span style="font-weight:bold;">⭐ 종합 만족도</span>
-            <div class="stars" data-category="total">
-                <span onclick="setRating('total',1)">★</span><span onclick="setRating('total',2)">★</span><span onclick="setRating('total',3)">★</span><span onclick="setRating('total',4)">★</span><span onclick="setRating('total',5)">★</span>
+        <button class="toggle-btn" onclick="toggleForm()">✍️ 평점 남기기</button>
+        <div id="rating-form">
             </div>
-        </div>
-        <div class="rating-item"><span>🛣️ 코스</span><div class="stars" data-category="course"><span onclick="setRating('course',1)">★</span><span onclick="setRating('course',2)">★</span><span onclick="setRating('course',3)">★</span><span onclick="setRating('course',4)">★</span><span onclick="setRating('course',5)">★</span></div></div>
-        <div class="rating-item"><span>🚩 운영</span><div class="stars" data-category="organize"><span onclick="setRating('organize',1)">★</span><span onclick="setRating('organize',2)">★</span><span onclick="setRating('organize',3)">★</span><span onclick="setRating('organize',4)">★</span><span onclick="setRating('organize',5)">★</span></div></div>
-        <div class="rating-item"><span>🥤 보급</span><div class="stars" data-category="supply"><span onclick="setRating('supply',1)">★</span><span onclick="setRating('supply',2)">★</span><span onclick="setRating('supply',3)">★</span><span onclick="setRating('supply',4)">★</span><span onclick="setRating('supply',5)">★</span></div></div>
-        <div class="rating-item"><span>🎁 기념품</span><div class="stars" data-category="souvenir"><span onclick="setRating('souvenir',1)">★</span><span onclick="setRating('souvenir',2)">★</span><span onclick="setRating('souvenir',3)">★</span><span onclick="setRating('souvenir',4)">★</span><span onclick="setRating('souvenir',5)">★</span></div></div>
-        <div class="rating-item"><span>💰 가성비</span><div class="stars" data-category="cost"><span onclick="setRating('cost',1)">★</span><span onclick="setRating('cost',2)">★</span><span onclick="setRating('cost',3)">★</span><span onclick="setRating('cost',4)">★</span><span onclick="setRating('cost',5)">★</span></div></div>
-        
-        <textarea id="comment" rows="3" placeholder="마라토너들에게 도움이 될 생생한 후기를 남겨주세요."></textarea>
-        <button onclick="submitReview()" style="width:100%; padding:15px; background:#333; color:white; border:none; border-radius:10px; margin-top:15px; font-weight:bold; cursor:pointer;">리뷰 등록하기</button>
+        <div id="reviews-display"></div>
     </div>
+    <script>
 
-    <div id="reviews-display">
-        <h3 style="margin-bottom:1.5rem;">💬 최근 리뷰 목록</h3>
-        <div id="reviews-list">불러오는 중...</div>
-    </div>
-</div>
 
 <script>
     // ⚠️ 개인 정보를 입력하세요
@@ -198,6 +134,8 @@
     }
 
     window.onload = () => { loadData(); fetchWeather(); generateCalendar(); };
+
+    
 </script>
 </body>
 </html>

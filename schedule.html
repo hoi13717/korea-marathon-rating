@@ -3,47 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>마라톤 일정 | Didim</title>
+    <title>Didim | 대회일정</title>
     <style>
         :root { --main-color: #e91e63; --bg-color: #f8f9fa; }
-        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; padding: 0; }
-        header { background: white; padding: 2rem; text-align: center; border-bottom: 2px solid var(--main-color); }
-        .nav-container { background: white; border-bottom: 1px solid #eee; display: flex; justify-content: center; padding: 10px 0; gap: 10px; }
-        .nav-item { text-decoration: none; color: #666; font-size: 0.9rem; font-weight: 600; padding: 8px 18px; border-radius: 25px; }
-        .nav-item.active { background-color: var(--main-color); color: white; }
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; }
+        .nav-container { background: white; border-bottom: 1px solid #eee; display: flex; justify-content: center; padding: 12px 0; gap: 15px; position: sticky; top: 0; z-index: 100; }
+        .nav-item { text-decoration: none; color: #666; font-size: 0.95rem; font-weight: 600; padding: 10px 20px; border-radius: 25px; }
+        .nav-item.active { background: var(--main-color); color: white; }
         .container { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
-        
-        /* 일정 카드 스타일 (이미지 예시 반영) */
         .race-card { background: white; display: flex; border-radius: 12px; margin-bottom: 1rem; border: 1px solid #eee; overflow: hidden; }
         .date-box { background: #fff9db; width: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; }
-        .info-box { flex: 1; padding: 1.2rem; position: relative; }
-        .status-badge { position: absolute; top: 1.2rem; right: 1.2rem; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; background: #edf2ff; color: #4c6ef5; }
+        .info-box { flex: 1; padding: 1.2rem; }
     </style>
 </head>
 <body>
-    <header><h1>Didim's Marathon</h1></header>
-
-
     <nav class="nav-container">
-    <a href="index.html" class="nav-item active">홈</a>
-    <a href="rating.html" class="nav-item">대회 평점</a>
-    <a href="schedule.html" class="nav-item">마라톤 일정</a>
-    <a href="#" class="nav-item">메뉴D</a>
-    <a href="#" class="nav-item">메뉴E</a>
+        <a href="index.html" class="nav-item">홈</a>
+        <a href="rating.html" class="nav-item">대회평점</a>
+        <a href="schedule.html" class="nav-item active">대회일정</a>
+        <a href="#" class="nav-item">메뉴D</a>
+        <a href="#" class="nav-item">메뉴E</a>
+        <a href="#" class="nav-item">메뉴F</a>
     </nav>
-
-
     <div class="container">
         <h2>🗓️ 마라톤 국내 대회 일정</h2>
-        <div class="race-card">
-            <div class="date-box"><div>1월 18일</div><div style="font-size:0.8rem; color:#888;">(일)</div></div>
-            <div class="info-box">
-                <div style="color:#228be6; font-size:0.8rem; font-weight:bold;">20km</div>
-                <div style="font-size:1.1rem; font-weight:bold; margin:5px 0;">광주 무등산트레일런</div>
-                <div style="font-size:0.85rem; color:#888;">광주 | 08:00 집결 | 2026</div>
-                <span class="status-badge">접수중</span>
-            </div>
         </div>
-    </div>
 </body>
 </html>
