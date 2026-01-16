@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RunStandard | 대회 평점 리포트</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js"></script> <style>
-        /* --- 1. 기본 스타일 영역 --- */
-        :root { --main-color: #e91e63; --bg-color: #f0f2f5; --major-gold: #f1c40f; }
+    <script src="config.js"></script>
+    <style>
+        :root { --main-color: #e91e63; --bg-color: #f0f2f5; --major-gold: #f1c40f; --star-color: #ffc107; }
         body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; color: #333; }
         
         .nav-container { background: white; border-bottom: 1px solid #eee; display: flex; justify-content: center; padding: 12px 0; gap: 15px; position: sticky; top: 0; z-index: 100; }
@@ -16,24 +16,32 @@
 
         .container { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
         
-        /* --- 2. 평점 카드 및 리뷰 폼 스타일 --- */
+        /* 평점 카드 스타일 */
         .race-card { background: white; border-radius: 24px; padding: 1.8rem; margin-bottom: 1.5rem; box-shadow: 0 8px 20px rgba(0,0,0,0.04); position: relative; border: 2px solid transparent; }
         .race-card.is-major { border-color: var(--major-gold); background: #fffdf5; }
         
         .race-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
-        .total-score { font-size: 2.5rem; font-weight: 900; color: var(--main-color); line-height: 1; }
         
-        .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; border-top: 1px solid #f1f3f5; padding-top: 18px; }
+        /* 별점 시각화 스타일 */
+        .star-display { color: var(--star-color); font-size: 1.4rem; margin-bottom: 5px; }
+        .total-score-num { font-size: 2rem; font-weight: 900; color: var(--main-color); line-height: 1; }
+        
+        /* 세부 지표 (항상 노출) */
+        .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; border-top: 1px solid #f1f3f5; padding-top: 18px; margin-bottom: 15px; }
         .detail-item { background: #f8f9fa; padding: 10px 5px; border-radius: 12px; text-align: center; font-size: 0.82rem; font-weight: 700; color: #555; }
 
-        /* 숨겨진 리뷰 폼 영역 */
-        .review-form-section { display: none; margin-top: 20px; padding: 20px; background: #fffafa; border-radius: 15px; border: 1px dashed #e91e63; }
-        .rating-input-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 15px; }
-        .rating-field { display: flex; flex-direction: column; gap: 5px; font-size: 0.85rem; font-weight: bold; }
-        .rating-field input { padding: 8px; border-radius: 8px; border: 1px solid #ddd; }
+        /* 리뷰 입력 폼 (별점 선택) */
+        .review-form-section { display: none; margin-top: 20px; padding: 25px; background: #fffafa; border-radius: 20px; border: 1px dashed var(--main-color); }
+        .input-star-group { margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; }
+        .input-star-group label { font-size: 0.9rem; font-weight: bold; color: #666; }
+        .star-rating { display: flex; flex-direction: row-reverse; gap: 5px; }
+        .star-rating input { display: none; }
+        .star-rating label { font-size: 1.5rem; color: #ddd; cursor: pointer; transition: 0.2s; }
+        .star-rating label:hover, .star-rating label:hover ~ label, .star-rating input:checked ~ label { color: var(--star-color); }
         
-        .toggle-review-btn { width: 100%; margin-top: 15px; background: white; border: 1.5px solid var(--main-color); color: var(--main-color); padding: 10px; border-radius: 12px; font-weight: bold; cursor: pointer; }
-        .submit-btn { width: 100%; padding: 12px; background: var(--main-color); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .toggle-review-btn { width: 100%; background: white; border: 1.5px solid var(--main-color); color: var(--main-color); padding: 12px; border-radius: 15px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .toggle-review-btn:hover { background: var(--main-color); color: white; }
+        .submit-btn { width: 100%; padding: 15px; background: var(--main-color); color: white; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -45,21 +53,27 @@
 </nav>
 
 <div class="container">
-    <h2>⭐ RunStandard 리포트</h2>
-    <div style="display: flex; gap: 10px; margin-bottom: 2rem;">
-        <input type="text" id="searchInput" placeholder="대회명 검색..." onkeyup="filterRaces()" style="flex:1; padding:12px; border-radius:12px; border:1px solid #ddd;">
-    </div>
+    <h2 style="font-size: 1.8rem;">⭐ RunStandard 레이스 리포트</h2>
+    <p style="color: #888; margin-bottom: 2rem;">공정한 기준으로 분석한 실시간 대회 품질 지수입니다.</p>
 
     <div id="race-list">
-        <p style="text-align: center; padding: 3rem;">데이터를 불러오고 있습니다...</p>
+        <p style="text-align: center; padding: 3rem;">데이터를 로딩 중...</p>
     </div>
 </div>
 
 <script>
-    // --- 3. JavaScript 로직 영역 ---
     const _supabase = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
-    // [A] 데이터 로드 및 그룹화 함수
+    // [A] 별점 시각화 함수 (점수를 별 아이콘으로 변환)
+    function getStarHTML(rating) {
+        const fullStars = Math.floor(rating);
+        const hasHalf = rating % 1 >= 0.5;
+        let stars = '★'.repeat(fullStars);
+        if (hasHalf) stars += '½'; // 또는 '☆'로 대체 가능
+        return stars.padEnd(5, '☆');
+    }
+
+    // [B] 데이터 로드 및 집계
     async function loadAndRender() {
         const { data: reviews, error } = await _supabase.from('reviews').select('*');
         if (error) return;
@@ -87,16 +101,19 @@
 
         let raceList = Object.values(raceGroups).map(r => ({
             ...r,
-            avgTotal: (r.scores.total / r.count).toFixed(1)
+            avgTotal: (r.scores.total / r.count).toFixed(1),
+            avgCourse: (r.scores.course / r.count).toFixed(1),
+            avgOrg: (r.scores.org / r.count).toFixed(1),
+            avgSupply: (r.scores.supply / r.count).toFixed(1),
+            avgGift: (r.scores.gift / r.count).toFixed(1),
+            avgCost: (r.scores.cost / r.count).toFixed(1)
         }));
 
-        // 메이저 우선 + 최신순 정렬
         raceList.sort((a, b) => (b.isMajor - a.isMajor) || (b.date - a.date));
-
         render(raceList);
     }
 
-    // [B] 카드 렌더링 함수 (입력 폼 포함)
+    // [C] 카드 렌더링 (별점 선택기 포함)
     function render(data) {
         const container = document.getElementById('race-list');
         container.innerHTML = data.map((race, idx) => `
@@ -104,64 +121,72 @@
                 <div class="race-header">
                     <div>
                         <h3 style="margin:0;">${race.name}</h3>
-                        <div style="font-size:0.85rem; color:#999; margin-top:5px;">📅 ${race.date.toISOString().split('T')[0]}</div>
+                        <div style="font-size:0.85rem; color:#999; margin-top:5px;">📅 ${race.date.toISOString().split('T')[0]} 개최</div>
                     </div>
                     <div style="text-align:right;">
-                        <div class="total-score">${race.avgTotal}</div>
+                        <div class="star-display">${getStarHTML(race.avgTotal)}</div>
+                        <div class="total-score-num">${race.avgTotal}</div>
                         <div style="font-size:0.75rem; color:#adb5bd;">${race.count}개의 리포트</div>
                     </div>
+                </div>
+
+                <div class="detail-grid">
+                    <div class="detail-item">🛣️ 코스: ${race.avgCourse}</div>
+                    <div class="detail-item">🚩 운영: ${race.avgOrg}</div>
+                    <div class="detail-item">🥤 보급: ${race.avgSupply}</div>
+                    <div class="detail-item">🎁 기념품: ${race.avgGift}</div>
+                    <div class="detail-item">💰 가성비: ${race.avgCost}</div>
                 </div>
                 
                 <button class="toggle-review-btn" onclick="toggleForm('form-${idx}')">✍️ 이 대회 평점 남기기</button>
 
                 <div id="form-${idx}" class="review-form-section">
-                    <div class="rating-input-group">
-                        <div class="rating-field"><label>🛣️ 코스</label><input type="number" id="c-${idx}" min="1" max="5" step="0.1" value="5"></div>
-                        <div class="rating-field"><label>🚩 운영</label><input type="number" id="o-${idx}" min="1" max="5" step="0.1" value="5"></div>
-                        <div class="rating-field"><label>🥤 보급</label><input type="number" id="s-${idx}" min="1" max="5" step="0.1" value="5"></div>
-                        <div class="rating-field"><label>🎁 기념품</label><input type="number" id="g-${idx}" min="1" max="5" step="0.1" value="5"></div>
-                        <div class="rating-field"><label>💰 가성비</label><input type="number" id="v-${idx}" min="1" max="5" step="0.1" value="5"></div>
-                    </div>
-                    <textarea id="msg-${idx}" placeholder="후기를 남겨주세요" style="width:100%; border-radius:10px; border:1px solid #ddd; padding:10px; margin-bottom:10px;"></textarea>
+                    ${['course', 'org', 'supply', 'gift', 'cost'].map(cat => `
+                        <div class="input-star-group">
+                            <label>${cat === 'course' ? '🛣️ 코스' : cat === 'org' ? '🚩 운영' : cat === 'supply' ? '🥤 보급' : cat === 'gift' ? '🎁 기념품' : '💰 가성비'}</label>
+                            <div class="star-rating">
+                                ${[5, 4, 3, 2, 1].map(n => `
+                                    <input type="radio" id="st-${cat}-${n}-${idx}" name="rate-${cat}-${idx}" value="${n}">
+                                    <label for="st-${cat}-${n}-${idx}">★</label>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `).join('')}
+                    <textarea id="msg-${idx}" placeholder="후기를 남겨주세요" style="width:100%; border-radius:15px; border:1px solid #ddd; padding:15px; margin-top:10px;"></textarea>
                     <button class="submit-btn" onclick="submitReview('${race.name}', ${idx})">리뷰 저장</button>
                 </div>
             </div>
         `).join('');
     }
 
-    // [C] 토글 함수 (열고 닫기)
     function toggleForm(id) {
         const f = document.getElementById(id);
         f.style.display = (f.style.display === 'block') ? 'none' : 'block';
     }
 
-    // [D] 리뷰 제출 함수
+    // [D] 리뷰 데이터 수집 및 제출
     async function submitReview(raceName, idx) {
+        const getVal = (cat) => {
+            const el = document.querySelector(`input[name="rate-${cat}-${idx}"]:checked`);
+            return el ? parseInt(el.value) : 5; // 선택 안 할 시 기본 5점
+        };
+
         const review = {
             marathon_name: raceName,
-            rating_course: parseFloat(document.getElementById(`c-${idx}`).value),
-            rating_organize: parseFloat(document.getElementById(`o-${idx}`).value),
-            rating_supply: parseFloat(document.getElementById(`s-${idx}`).value),
-            rating_souvenir: parseFloat(document.getElementById(`g-${idx}`).value),
-            rating_cost: parseFloat(document.getElementById(`v-${idx}`).value),
+            rating_course: getVal('course'),
+            rating_organize: getVal('org'),
+            rating_supply: getVal('supply'),
+            rating_souvenir: getVal('gift'),
+            rating_cost: getVal('cost'),
             comment: document.getElementById(`msg-${idx}`).value,
             race_date: new Date().toISOString().split('T')[0]
         };
+        
         review.rating_total = parseFloat(((review.rating_course + review.rating_organize + review.rating_supply + review.rating_souvenir + review.rating_cost) / 5).toFixed(1));
 
         const { error } = await _supabase.from('reviews').insert([review]);
         if (error) alert('실패: ' + error.message);
-        else { alert('저장 완료!'); location.reload(); }
-    }
-
-    // [E] 검색 필터 함수
-    function filterRaces() {
-        const val = document.getElementById('searchInput').value.toLowerCase();
-        const cards = document.getElementsByClassName('race-card');
-        Array.from(cards).forEach(c => {
-            const name = c.querySelector('h3').innerText.toLowerCase();
-            c.style.display = name.includes(val) ? 'block' : 'none';
-        });
+        else { alert('리뷰가 저장되었습니다!'); location.reload(); }
     }
 
     window.onload = loadAndRender;
