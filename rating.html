@@ -10,39 +10,39 @@
         :root { --main-color: #e91e63; --bg-color: #f0f2f5; --card-bg: #ffffff; --major-gold: #f1c40f; }
         body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; color: #333; line-height: 1.6; }
         
-        /* 네비게이션 (공통 구조) */
+        /* 공통 네비게이션 */
         .nav-container { background: white; border-bottom: 1px solid #eee; display: flex; justify-content: center; padding: 12px 0; gap: 15px; position: sticky; top: 0; z-index: 100; }
         .nav-item { text-decoration: none; color: #666; font-size: 0.95rem; font-weight: 600; padding: 10px 20px; border-radius: 25px; transition: 0.3s; }
-        .nav-item.active { background: var(--main-color); color: white; }
+        .nav-item.active { background: var(--main-color); color: white; box-shadow: 0 4px 10px rgba(233, 30, 99, 0.2); }
 
         .container { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
         
-        /* 필터 및 검색바 */
+        /* 상단 필터 및 검색 */
         .filter-section { display: flex; gap: 10px; margin-bottom: 2rem; flex-wrap: wrap; }
-        .search-input { flex: 1; padding: 12px 20px; border-radius: 12px; border: 1px solid #ddd; font-size: 1rem; }
-        .sort-select { padding: 10px; border-radius: 12px; border: 1px solid #ddd; background: white; cursor: pointer; }
+        .search-input { flex: 1; padding: 12px 20px; border-radius: 12px; border: 1px solid #ddd; font-size: 1rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+        .sort-select { padding: 10px; border-radius: 12px; border: 1px solid #ddd; background: white; cursor: pointer; font-weight: 600; }
 
         /* 대회 카드 디자인 */
-        .race-card { background: white; border-radius: 20px; padding: 1.5rem; margin-bottom: 1.2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: relative; border: 1px solid transparent; transition: 0.3s; cursor: pointer; }
-        .race-card:hover { transform: translateY(-3px); border-color: var(--main-color); }
-        .race-card.is-major { border: 2px solid var(--major-gold); background: #fffdf5; }
+        .race-card { background: white; border-radius: 24px; padding: 1.8rem; margin-bottom: 1.5rem; box-shadow: 0 8px 20px rgba(0,0,0,0.04); position: relative; border: 2px solid transparent; transition: 0.3s; cursor: pointer; }
+        .race-card:hover { transform: translateY(-5px); border-color: var(--main-color); }
+        .race-card.is-major { border-color: var(--major-gold); background: #fffdf5; }
         
-        /* 메이저 배지 */
-        .major-badge { position: absolute; top: -10px; left: 20px; background: var(--major-gold); color: #333; font-size: 0.75rem; font-weight: 800; padding: 4px 12px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        /* 메이저 전용 배지 */
+        .major-badge { position: absolute; top: -12px; left: 24px; background: var(--major-gold); color: #333; font-size: 0.75rem; font-weight: 800; padding: 5px 14px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
 
-        .race-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
-        .race-info h3 { margin: 0; font-size: 1.25rem; color: #1a1a1a; }
-        .race-date { font-size: 0.85rem; color: #888; margin-top: 4px; }
+        .race-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+        .race-info h3 { margin: 0; font-size: 1.4rem; color: #1a1a1a; letter-spacing: -0.5px; }
+        .race-date { font-size: 0.9rem; color: #999; margin-top: 6px; font-weight: 500; }
         
         .score-box { text-align: right; }
-        .total-score { font-size: 2.2rem; font-weight: 900; color: var(--main-color); line-height: 1; }
-        .review-count { font-size: 0.75rem; color: #adb5bd; margin-top: 5px; }
+        .total-score { font-size: 2.5rem; font-weight: 900; color: var(--main-color); line-height: 1; }
+        .review-count { font-size: 0.8rem; color: #adb5bd; margin-top: 8px; font-weight: 600; }
 
-        /* 세부 지표 그리드 */
-        .detail-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; border-top: 1px solid #f1f1f1; padding-top: 15px; }
-        .detail-item { background: #f8f9fa; padding: 8px; border-radius: 10px; text-align: center; font-size: 0.8rem; color: #666; font-weight: 600; }
+        /* 세부 평점 그리드 (텍스트 라벨 포함) */
+        .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; border-top: 1px solid #f1f3f5; padding-top: 18px; }
+        .detail-item { background: #f8f9fa; padding: 10px 5px; border-radius: 12px; text-align: center; font-size: 0.82rem; color: #555; font-weight: 700; white-space: nowrap; }
 
-        footer { text-align: center; padding: 4rem 0; color: #adb5bd; font-size: 0.85rem; }
+        footer { text-align: center; padding: 5rem 0; color: #adb5bd; font-size: 0.9rem; border-top: 1px solid #eee; margin-top: 4rem; }
     </style>
 </head>
 <body>
@@ -56,25 +56,26 @@
 </nav>
 
 <div class="container">
-    <h2 style="margin-bottom: 0.5rem;">⭐ RunStandard 리포트</h2>
-    <p style="color: #888; margin-bottom: 2rem;">러너들의 데이터로 검증된 국내 대회 품질 지수입니다.</p>
+    <h2 style="margin-bottom: 0.6rem; font-size: 1.8rem; color: #1a1a1a;">⭐ RunStandard 레이스 리포트</h2>
+    <p style="color: #888; margin-bottom: 2.5rem; font-weight: 500;">연간 200여 개의 대회를 공정한 기준으로 분석합니다.</p>
 
     <div class="filter-section">
-        <input type="text" id="searchInput" class="search-input" placeholder="대회명을 입력하세요..." onkeyup="filterRaces()">
+        <input type="text" id="searchInput" class="search-input" placeholder="찾으시는 대회명을 입력하세요..." onkeyup="filterRaces()">
         <select id="sortSelect" class="sort-select" onchange="loadAndRender()">
-            <option value="default">추천 정렬 (메이저 우선)</option>
-            <option value="newest">최신 대회순</option>
-            <option value="highest">평점 높은순</option>
+            <option value="default">표준 정렬 (메이저 우선)</option>
+            <option value="newest">최신 개최순</option>
+            <option value="highest">종합 평점순</option>
         </select>
     </div>
 
     <div id="race-list">
-        <p style="text-align: center; padding: 3rem; color: #adb5bd;">데이터를 분석하고 있습니다...</p>
+        <p style="text-align: center; padding: 4rem; color: #adb5bd; font-weight: 600;">표준 데이터를 불러오고 있습니다...</p>
     </div>
 </div>
 
 <footer>
-    <p>© 2026 RunStandard. 특정 기업과 무관한 독립 플랫폼입니다.</p>
+    <p>RunStandard - 공정한 대회 운영을 지향하는 독립 커뮤니티</p>
+    <p style="margin-top: 8px; font-size: 0.8rem;">본 사이트는 특정 기업의 이해관계와 무관하게 운영됩니다.</p>
 </footer>
 
 <script>
@@ -84,21 +85,21 @@
         const listContainer = document.getElementById('race-list');
         const sortBy = document.getElementById('sortSelect').value;
 
-        // 1. 모든 리뷰 데이터 가져오기
+        // 1. 전체 리뷰 데이터 호출
         const { data: reviews, error } = await _supabase.from('reviews').select('*');
         
         if (error || !reviews) {
-            listContainer.innerHTML = '<p>데이터를 불러오는 중 오류가 발생했습니다.</p>';
+            listContainer.innerHTML = '<p style="text-align:center; padding:2rem;">데이터 로딩 실패. 설정 파일을 확인해주세요.</p>';
             return;
         }
 
-        // 2. 대회별로 데이터 그룹화 및 집계
+        // 2. 대회별 그룹화 및 평균 계산 로직
         const raceGroups = reviews.reduce((acc, cur) => {
             const name = cur.marathon_name;
             if (!acc[name]) {
                 acc[name] = { 
                     name, 
-                    isMajor: cur.is_major || false, // 리뷰 등록 시 관리자가 마킹한다고 가정
+                    isMajor: cur.is_major || false, // 관리자가 마킹한 주요 대회 여부
                     date: new Date(cur.race_date || '2026-01-01'), 
                     scores: { total: 0, course: 0, org: 0, supply: 0, gift: 0, cost: 0 },
                     count: 0 
@@ -114,7 +115,6 @@
             return acc;
         }, {});
 
-        // 3. 배열 변환 및 평균 계산
         let raceList = Object.values(raceGroups).map(r => ({
             ...r,
             avgTotal: (r.scores.total / r.count).toFixed(1),
@@ -125,12 +125,12 @@
             avgCost: (r.scores.cost / r.count).toFixed(1)
         }));
 
-        // 4. 하원님의 3단계 정렬 로직 적용
+        // 3. 하원님의 우선순위 정렬 로직 적용
         raceList.sort((a, b) => {
             if (sortBy === 'default') {
-                // 1순위: 메이저 우선
+                // 1순위: 메이저 대회 최상단 고정
                 if (a.isMajor !== b.isMajor) return b.isMajor - a.isMajor;
-                // 2순위: 날짜 최신순
+                // 2순위: 개최일이 현재와 가까운 최신순
                 return b.date - a.date;
             } else if (sortBy === 'newest') {
                 return b.date - a.date;
@@ -145,29 +145,30 @@
     function render(data) {
         const container = document.getElementById('race-list');
         if (data.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#888;">검색 결과가 없습니다.</p>';
+            container.innerHTML = '<p style="text-align:center; color:#888; padding:3rem;">검색 결과가 없습니다.</p>';
             return;
         }
 
+        // 4. 리스트 카드 생성 (아이콘 + 텍스트 라벨 포함)
         container.innerHTML = data.map(race => `
             <div class="race-card ${race.isMajor ? 'is-major' : ''}" onclick="alert('${race.name}의 상세 페이지는 준비 중입니다!')">
                 ${race.isMajor ? '<div class="major-badge">RUNSTANDARD MAJOR</div>' : ''}
                 <div class="race-header">
                     <div class="race-info">
                         <h3>${race.name}</h3>
-                        <div class="race-date">📅 ${race.date.toISOString().split('T')[0]}</div>
+                        <div class="race-date">📅 ${race.date.toISOString().split('T')[0]} 개최</div>
                     </div>
                     <div class="score-box">
                         <div class="total-score">${race.avgTotal}</div>
-                        <div class="review-count">${race.count}개의 리뷰</div>
+                        <div class="review-count">${race.count}개의 리포트</div>
                     </div>
                 </div>
                 <div class="detail-grid">
-                    <div class="detail-item">🛣️ ${race.avgCourse}</div>
-                    <div class="detail-item">🚩 ${race.avgOrg}</div>
-                    <div class="detail-item">🥤 ${race.avgSupply}</div>
-                    <div class="detail-item">🎁 ${race.avgGift}</div>
-                    <div class="detail-item">💰 ${race.avgCost}</div>
+                    <div class="detail-item">🛣️ 코스: ${race.avgCourse}</div>
+                    <div class="detail-item">🚩 운영: ${race.avgOrg}</div>
+                    <div class="detail-item">🥤 보급: ${race.avgSupply}</div>
+                    <div class="detail-item">🎁 기념품: ${race.avgGift}</div>
+                    <div class="detail-item">💰 가성비: ${race.avgCost}</div>
                 </div>
             </div>
         `).join('');
