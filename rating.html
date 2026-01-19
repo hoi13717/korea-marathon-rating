@@ -17,7 +17,6 @@
 
         .container { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
         
-        /* 메인 카드 */
         .race-card { background: white; border-radius: 24px; padding: 1.8rem; margin-bottom: 1.5rem; box-shadow: 0 8px 20px rgba(0,0,0,0.04); position: relative; border: 2px solid transparent; }
         .race-card.is-major { border-color: var(--major-gold); background: #fffdf5; }
         .major-badge { position: absolute; top: -12px; left: 24px; background: var(--major-gold); color: #333; font-size: 0.75rem; font-weight: 800; padding: 5px 14px; border-radius: 10px; z-index: 1; }
@@ -30,7 +29,6 @@
         .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(95px, 1fr)); gap: 8px; border-top: 1px solid #f1f3f5; padding-top: 18px; margin-bottom: 15px; }
         .detail-item { background: var(--bg-light); padding: 10px 4px; border-radius: 12px; text-align: center; font-size: 0.78rem; font-weight: 700; color: #555; }
 
-        /* 리뷰 피드 스타일 */
         .review-feed { margin-top: 20px; background: #fafafa; border-radius: 15px; padding: 15px; }
         .feed-title { font-size: 0.9rem; font-weight: 800; color: #666; margin-bottom: 12px; }
         .individual-review { background: white; border-radius: 12px; padding: 15px; margin-bottom: 10px; border: 1px solid #eee; }
@@ -40,11 +38,10 @@
         .rev-stars { color: var(--star-color); font-size: 0.8rem; }
         .rev-comment { font-size: 0.9rem; color: #444; margin: 10px 0; white-space: pre-line; }
         
-        /* 개별 지표 배지 스타일 (텍스트 포함 버전) */
         .rev-detail-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
         .rev-detail-tag { font-size: 0.72rem; background: #f1f3f5; padding: 3px 10px; border-radius: 8px; color: #666; font-weight: 700; border: 1px solid #e9ecef; }
 
-        .more-reviews-btn { width: 100%; padding: 12px; background: white; border: 1px solid #ddd; border-radius: 12px; color: #666; font-size: 0.85rem; font-weight: bold; cursor: pointer; margin-top: 5px; transition: 0.2s; }
+        .more-reviews-btn { width: 100%; padding: 12px; background: white; border: 1px solid #ddd; border-radius: 12px; color: #666; font-size: 0.85rem; font-weight: bold; cursor: pointer; margin-top: 5px; }
 
         .review-form-section { display: none; margin-top: 20px; padding: 25px; background: #fffafa; border-radius: 20px; border: 1px dashed var(--main-color); }
         .star-rating { display: flex; flex-direction: row-reverse; gap: 5px; }
@@ -72,8 +69,14 @@
 <script>
     const _supabase = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
-    const NICKNAMES = ["풀코스완주자", "보급소털이범", "러닝은장비빨", "카본화성애자", "대회수집가", "아미노바이탈중독", "고글속의눈물", "페이스조절실패", "서브3꿈나무", "업힐요정"];
-    function getRandomNickname() { return NICKNAMES[Math.floor(Math.random() * NICKNAMES.length)]; }
+    const NICKNAMES = ["풀코스완주자", "보급소털이범", "러닝은장비빨", "카본화성애자", "대회수집가", "아미노바이탈중독", "고글속의눈물", "페이스조절실패", "서브3꿈나무", "업힐요정", "피니시라인포즈장인", "무릎연골보호회"];
+
+    function generateUniqueId() {
+        const nick = NICKNAMES[Math.floor(Math.random() * NICKNAMES.length)];
+        const randNum = Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000;
+        return `${nick}_${randNum}`;
+    }
+
     function getStarHTML(score) { return '★'.repeat(Math.round(score)) + '☆'.repeat(5 - Math.round(score)); }
 
     async function loadAndRender() {
@@ -119,7 +122,7 @@
                     <div id="form-${idx}" class="review-form-section">
                         ${['course', 'org', 'supply', 'gift', 'cost'].map(cat => `
                             <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                                <label style="font-size:0.9rem; font-weight:bold;">${cat === 'course' ? '🛣️ 코스' : cat === 'org' ? '🚩 운영' : cat === 'supply' ? '🥤 보급' : cat === 'gift' ? '🎁 선물' : '💰 가성비'}</label>
+                                <label style="font-size:0.9rem; font-weight:bold;">${cat === 'course' ? '🛣️ 코스' : cat === 'org' ? '🚩 운영' : cat === 'supply' ? '🥤 보급' : cat === 'gift' ? '🎁 기념품' : '💰 가성비'}</label>
                                 <div class="star-rating">${[5,4,3,2,1].map(n => `<input type="radio" id="st-${cat}-${n}-${idx}" name="r-${cat}-${idx}" value="${n}"><label for="st-${cat}-${n}-${idx}">★</label>`).join('')}</div>
                             </div>
                         `).join('')}
@@ -142,12 +145,12 @@
         }).join('');
     }
 
-    // [핵심] 개별 리뷰 HTML 생성 (텍스트 추가 버전)
     function createReviewHTML(rev) {
+        const displayId = rev.user_id || "익명러너_00000"; 
         return `
             <div class="individual-review">
                 <div class="rev-user-info">
-                    <span class="rev-nickname">👤 ${getRandomNickname()}</span>
+                    <span class="rev-nickname">👤 ${displayId}</span>
                     <span class="rev-date">${new Date(rev.created_at).toLocaleDateString()}</span>
                 </div>
                 <div class="rev-stars">${getStarHTML(rev.rating_total)}</div>
@@ -156,7 +159,7 @@
                     <span class="rev-detail-tag">🛣️ 코스 ${rev.rating_course}</span>
                     <span class="rev-detail-tag">🚩 운영 ${rev.rating_organize}</span>
                     <span class="rev-detail-tag">🥤 보급 ${rev.rating_supply}</span>
-                    <span class="rev-detail-tag">🎁 선물 ${rev.rating_souvenir}</span>
+                    <span class="rev-detail-tag">🎁 기념품 ${rev.rating_souvenir}</span>
                     <span class="rev-detail-tag">💰 가성비 ${rev.rating_cost}</span>
                 </div>
             </div>
@@ -185,8 +188,11 @@
             return el ? parseInt(el.value) : 5;
         };
 
+        const generatedId = generateUniqueId();
+
         const review = {
             schedule_id: raceId,
+            user_id: generatedId,
             marathon_name: document.getElementById(`title-${idx}`).innerText,
             rating_course: getVal('course'), rating_organize: getVal('org'),
             rating_supply: getVal('supply'), rating_souvenir: getVal('gift'),
@@ -199,7 +205,8 @@
         if (error) alert(error.message);
         else {
             localStorage.setItem('last_sub', Date.now());
-            alert('리뷰가 등록되었습니다!'); location.reload();
+            alert(`리뷰가 등록되었습니다! 당신의 고유 ID는 [${generatedId}] 입니다.`);
+            location.reload();
         }
     }
 
