@@ -3,30 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Didim | 대회일정</title>
+    <title>RunStandard | 2026 대회 일정</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
     <style>
-        :root { --main-color: #e91e63; --bg-color: #f8f9fa; }
-        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; }
+        :root { --main-color: #e91e63; --bg-color: #f8f9fa; --accent-blue: #4a90e2; --major-gold: #f1c40f; }
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; color: #333; }
+        
+        /* 네비게이션 */
         .nav-container { background: white; border-bottom: 1px solid #eee; display: flex; justify-content: center; padding: 12px 0; gap: 15px; position: sticky; top: 0; z-index: 100; }
-        .nav-item { text-decoration: none; color: #666; font-size: 0.95rem; font-weight: 600; padding: 10px 20px; border-radius: 25px; }
-        .nav-item.active { background: var(--main-color); color: white; }
+        .nav-item { text-decoration: none; color: #666; font-size: 0.95rem; font-weight: 600; padding: 10px 20px; border-radius: 25px; transition: 0.3s; }
+        .nav-item.active { background: var(--main-color); color: white; box-shadow: 0 4px 10px rgba(233, 30, 99, 0.2); }
+
         .container { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
-        .race-card { background: white; display: flex; border-radius: 12px; margin-bottom: 1rem; border: 1px solid #eee; overflow: hidden; }
-        .date-box { background: #fff9db; width: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; }
-        .info-box { flex: 1; padding: 1.2rem; }
+        
+        /* 검색창 및 필터 */
+        .search-section { margin-bottom: 2rem; display: flex; gap: 10px; }
+        .search-input { flex: 1; padding: 15px 25px; border-radius: 15px; border: 1px solid #ddd; font-size: 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+
+        /* 대회 카드 디자인 */
+        .schedule-card { background: white; border-radius: 24px; padding: 1.8rem; margin-bottom: 1.5rem; box-shadow: 0 8px 25px rgba(0,0,0,0.05); position: relative; border: 2px solid transparent; overflow: hidden; }
+        .schedule-card.is-major { border-color: var(--major-gold); }
+        
+        /* 접수 상태 배지 */
+        .status-badge { display: inline-block; padding: 5px 15px; border-radius: 10px; font-size: 0.8rem; font-weight: 800; margin-bottom: 15px; }
+        .status-open { background: #eef4ff; color: var(--accent-blue); }
+        .status-closed { background: #f1f1f1; color: #999; }
+        .status-upcoming { background: #fff4f7; color: var(--main-color); }
+
+        .card-header h3 { margin: 0; font-size: 1.4rem; color: #1a1a1a; margin-bottom: 10px; }
+        
+        /* 코스 종류 배지 */
+        .dist-tags { display: flex; gap: 8px; margin-bottom: 20px; }
+        .tag { background: #f0f2f5; color: #666; padding: 4px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; }
+
+        /* 정보 목록 */
+        .info-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+        .info-item { display: flex; align-items: center; gap: 10px; font-size: 0.95rem; color: #555; }
+        .info-icon { width: 20px; text-align: center; }
+
+        /* 상세 설명 영역 (토글) */
+        .detail-content { margin-top: 20px; padding-top: 20px; border-top: 1px solid #f1f1f1; display: none; }
+        .toggle-btn { width: 100%; padding: 12px; border-radius: 15px; border: 1px solid #eee; background: #fff; color: #888; font-weight: bold; cursor: pointer; margin-top: 15px; transition: 0.2s; }
+        .toggle-btn:hover { background: #f9f9f9; color: var(--main-color); }
+
+        footer { text-align: center; padding: 5rem 0; color: #adb5bd; font-size: 0.9rem; }
     </style>
 </head>
 <body>
-    <nav class="nav-container">
-        <a href="index.html" class="nav-item">홈</a>
-        <a href="rating.html" class="nav-item">대회평점</a>
-        <a href="schedule.html" class="nav-item active">대회일정</a>
-        <a href="#" class="nav-item">메뉴D</a>
-        <a href="#" class="nav-item">메뉴E</a>
-        <a href="#" class="nav-item">메뉴F</a>
-    </nav>
-    <div class="container">
-        <h2>🗓️ 마라톤 국내 대회 일정</h2>
-        </div>
+
+<nav class="nav-container">
+    <a href="index.html" class="nav-item">홈</a>
+    <a href="rating.html" class="nav-item">대회평점</a>
+    <a href="schedule.html" class="nav-item active">대회일정</a>
+</nav>
+
+<div class="container">
+    <h2 style="font-size: 1.8rem; margin-bottom: 0.5rem;">📅 2026 레이스 캘린더</h2>
+    <p style="color: #888; margin-bottom: 2.5rem; font-weight: 500;">전국의 주요 대회 일정을 관리자가 직접 검증하여 안내합니다.</p>
+
+    <div class="search-section">
+        <input type="text" id="searchInput" class="search-input" placeholder="대회명 또는 지역으로 검색..." onkeyup="filterSchedules()">
+    </div>
+
+    <div id="schedule-list">
+        <p style="text-align: center; padding: 4rem; color: #adb5bd;">대회 정보를 동기화 중입니다...</p>
+    </div>
+</div>
+
+<footer>
+    <p>© 2026 RunStandard. 모든 일정은 주최측 사정에 의해 변경될 수 있습니다.</p>
+</footer>
+
+<script>
+    const _supabase = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+
+    async function loadSchedules() {
+        const listContainer = document.getElementById('schedule-list');
+        
+        // 1. 데이터 가져오기 (날짜 가까운 순)
+        const { data: schedules, error } = await _supabase
+            .from('schedules')
+            .select('*')
+            .order('race_date', { ascending: true });
+
+        if (error || !schedules) {
+            listContainer.innerHTML = '<p>데이터를 불러오지 못했습니다.</p>';
+            return;
+        }
+
+        renderSchedules(schedules);
+    }
+
+    function renderSchedules(data) {
+        const container = document.getElementById('schedule-list');
+        const today = new Date();
+
+        container.innerHTML = data.map((race, idx) => {
+            // 접수 상태 계산 로직
+            const regStart = new Date(race.reg_start_date);
+            const regEnd = new Date(race.reg_end_date);
+            let statusHTML = '';
+
+            if (today < regStart) {
+                statusHTML = '<span class="status-badge status-upcoming">접수 예정</span>';
+            } else if (today >= regStart && today <= regEnd) {
+                statusHTML = '<span class="status-badge status-open">지금 신청하기</span>';
+            } else {
+                statusHTML = '<span class="status-badge status-closed">접수 마감</span>';
+            }
+
+            return `
+                <div class="schedule-card ${race.is_major ? 'is-major' : ''}">
+                    ${statusHTML}
+                    <div class="card-header">
+                        <h3>${race.title}</h3>
+                    </div>
+
+                    <div class="dist-tags">
+                        ${race.dist_badge ? race.dist_badge.split(',').map(d => `<span class="tag">${d.trim()}</span>`).join('') : ''}
+                    </div>
+
+                    <div class="info-list">
+                        <div class="info-item"><span class="info-icon">📍</span> ${race.location}</div>
+                        <div class="info-item"><span class="info-icon">📅</span> ${race.race_date}</div>
+                        <div class="info-item"><span class="info-icon">🕒</span> ${race.assembly_time || '시간 미정'}</div>
+                    </div>
+
+                    <div id="detail-${idx}" class="detail-content">
+                        <p style="font-size: 0.9rem; color: #777; line-height: 1.8; background: #fdfdfd; padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+                            ${race.description || '상세 내용이 등록되지 않았습니다.'}
+                        </p>
+                        <div style="font-size: 0.85rem; color: #555;">
+                            <div>📧 문의: ${race.contact_email || '-'}</div>
+                            <div>📞 전화: ${race.contact_phone || '-'}</div>
+                        </div>
+                        ${race.link_url ? `<a href="${race.link_url}" target="_blank" style="display:block; margin-top:15px; text-align:center; background:var(--accent-blue); color:white; text-decoration:none; padding:12px; border-radius:12px; font-weight:bold;">공식 홈페이지 가기</a>` : ''}
+                    </div>
+
+                    <button class="toggle-btn" onclick="toggleDetail('detail-${idx}', this)">더 보기 ▾</button>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function toggleDetail(id, btn) {
+        const detail = document.getElementById(id);
+        const isOpen = detail.style.display === 'block';
+        detail.style.display = isOpen ? 'none' : 'block';
+        btn.innerText = isOpen ? '더 보기 ▾' : '상세 정보 접기 ▴';
+    }
+
+    function filterSchedules() {
+        const val = document.getElementById('searchInput').value.toLowerCase();
+        const cards = document.getElementsByClassName('schedule-card');
+        Array.from(cards).forEach(card => {
+            const text = card.innerText.toLowerCase();
+            card.style.display = text.includes(val) ? 'block' : 'none';
+        });
+    }
+
+    window.onload = loadSchedules;
+</script>
 </body>
 </html>
