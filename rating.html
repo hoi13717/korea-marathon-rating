@@ -10,14 +10,14 @@
         :root { --main-color: #e91e63; --bg-color: #f0f2f5; --major-gold: #f1c40f; --star-color: #ffc107; }
         body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; color: #333; }
         
-        /* 네비게이션 */
+        /* 공통 네비게이션 */
         .nav-container { background: white; border-bottom: 1px solid #eee; display: flex; justify-content: center; padding: 12px 0; gap: 15px; position: sticky; top: 0; z-index: 100; }
         .nav-item { text-decoration: none; color: #666; font-size: 0.95rem; font-weight: 600; padding: 10px 20px; border-radius: 25px; transition: 0.3s; }
-        .nav-item.active { background: var(--main-color); color: white; }
+        .nav-item.active { background: var(--main-color); color: white; box-shadow: 0 4px 10px rgba(233, 30, 99, 0.2); }
 
         .container { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
         
-        /* 카드 스타일 */
+        /* 카드 디자인 */
         .race-card { background: white; border-radius: 24px; padding: 1.8rem; margin-bottom: 1.5rem; box-shadow: 0 8px 20px rgba(0,0,0,0.04); position: relative; border: 2px solid transparent; }
         .race-card.is-major { border-color: var(--major-gold); background: #fffdf5; }
         .major-badge { position: absolute; top: -12px; left: 24px; background: var(--major-gold); color: #333; font-size: 0.75rem; font-weight: 800; padding: 5px 14px; border-radius: 10px; }
@@ -26,11 +26,11 @@
         .star-display { color: var(--star-color); font-size: 1.4rem; letter-spacing: 2px; }
         .total-score-num { font-size: 2.2rem; font-weight: 900; color: var(--main-color); line-height: 1; }
         
-        /* 세부 지표 */
+        /* 항상 노출되는 세부 지표 */
         .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; border-top: 1px solid #f1f3f5; padding-top: 18px; margin-bottom: 15px; }
         .detail-item { background: #f8f9fa; padding: 10px 5px; border-radius: 12px; text-align: center; font-size: 0.82rem; font-weight: 700; color: #555; }
 
-        /* 별점 입력 UI */
+        /* 클릭형 별점 입력 UI */
         .review-form-section { display: none; margin-top: 20px; padding: 25px; background: #fffafa; border-radius: 20px; border: 1px dashed var(--main-color); }
         .input-star-group { margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; }
         .star-rating { display: flex; flex-direction: row-reverse; gap: 5px; }
@@ -52,52 +52,58 @@
 
 <div class="container">
     <h2 style="font-size: 1.8rem; margin-bottom: 0.5rem;">⭐ RunStandard 레이스 리포트</h2>
-    <p style="color: #888; margin-bottom: 2rem;">관리자가 등록한 정식 대회의 검증된 평점 리스트입니다.</p>
+    <p style="color: #888; margin-bottom: 2rem;">마스터 ID를 기반으로 관리되는 정식 대회 평점 시스템입니다.</p>
     
     <div id="race-list">
-        <p style="text-align: center; padding: 3rem; color: #adb5bd;">마스터 데이터를 불러오는 중...</p>
+        <p style="text-align: center; padding: 3rem; color: #adb5bd;">데이터를 동기화 중입니다...</p>
     </div>
 </div>
 
 <script>
     const _supabase = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
+    // [A] 별점 시각화 헬퍼
     function getStarDisplay(score) {
         const rating = Math.round(score);
         return '★'.repeat(rating) + '☆'.repeat(5 - rating);
     }
 
+    // [B] 데이터 로드 및 연동 (ID 기반)
     async function loadAndRender() {
-        // 1. 하원님이 관리하는 정식 대회 목록(Master)을 먼저 가져옵니다.
         const { data: schedules } = await _supabase.from('schedules').select('*');
-        // 2. 전체 리뷰 데이터를 가져옵니다.
         const { data: reviews } = await _supabase.from('reviews').select('*');
 
         if (!schedules) return;
 
-        // 3. 마스터 리스트를 기준으로 리뷰 데이터를 결합합니다.
+        // 마스터 리스트를 순회하며 ID가 일치하는 리뷰만 집계
         const raceList = schedules.map(race => {
-            const matchedReviews = reviews ? reviews.filter(rev => rev.marathon_name === race.title) : [];
+            const matchedReviews = reviews ? reviews.filter(rev => rev.schedule_id === race.id) : [];
             const count = matchedReviews.length;
 
-            const averages = {
-                total: count > 0 ? (matchedReviews.reduce((s, r) => s + r.rating_total, 0) / count).toFixed(1) : "0.0",
-                course: count > 0 ? (matchedReviews.reduce((s, r) => s + r.rating_course, 0) / count).toFixed(1) : "0.0",
-                org: count > 0 ? (matchedReviews.reduce((s, r) => s + r.rating_organize, 0) / count).toFixed(1) : "0.0",
-                supply: count > 0 ? (matchedReviews.reduce((s, r) => s + r.rating_supply, 0) / count).toFixed(1) : "0.0",
-                gift: count > 0 ? (matchedReviews.reduce((s, r) => s + r.rating_souvenir, 0) / count).toFixed(1) : "0.0",
-                cost: count > 0 ? (matchedReviews.reduce((s, r) => s + r.rating_cost, 0) / count).toFixed(1) : "0.0"
-            };
+            const calcAvg = (key) => count > 0 ? (matchedReviews.reduce((sum, r) => sum + r[key], 0) / count).toFixed(1) : "0.0";
 
-            return { ...race, ...averages, count };
+            return {
+                id: race.id,
+                title: race.title,
+                is_major: race.is_major,
+                race_date: race.race_date,
+                count: count,
+                avgTotal: calcAvg('rating_total'),
+                avgCourse: calcAvg('rating_course'),
+                avgOrg: calcAvg('rating_organize'),
+                avgSupply: calcAvg('rating_supply'),
+                avgGift: calcAvg('rating_souvenir'),
+                avgCost: calcAvg('rating_cost')
+            };
         });
 
-        // 4. 하원님이 정하신 3단계 정렬: 메이저 우선 -> 날짜 최신순
+        // 3단계 정렬: 메이저 우선 -> 날짜 최신순
         raceList.sort((a, b) => (b.is_major - a.is_major) || (new Date(b.race_date) - new Date(a.race_date)));
 
         render(raceList);
     }
 
+    // [C] 카드 렌더링
     function render(data) {
         const container = document.getElementById('race-list');
         container.innerHTML = data.map((race, idx) => `
@@ -105,22 +111,22 @@
                 ${race.is_major ? '<div class="major-badge">RUNSTANDARD MAJOR</div>' : ''}
                 <div class="race-header">
                     <div>
-                        <h3 style="margin:0;">${race.title}</h3>
+                        <h3 id="race-title-${idx}" style="margin:0;">${race.title}</h3>
                         <div style="font-size:0.85rem; color:#999; margin-top:5px;">📅 ${race.race_date} 개최</div>
                     </div>
                     <div style="text-align:right;">
-                        <div class="star-display">${getStarDisplay(race.total)}</div>
-                        <div class="total-score-num">${race.total}</div>
+                        <div class="star-display">${getStarDisplay(race.avgTotal)}</div>
+                        <div class="total-score-num">${race.avgTotal}</div>
                         <div style="font-size:0.75rem; color:#adb5bd;">${race.count}개의 리포트</div>
                     </div>
                 </div>
 
                 <div class="detail-grid">
-                    <div class="detail-item">🛣️ 코스: ${race.course}</div>
-                    <div class="detail-item">🚩 운영: ${race.org}</div>
-                    <div class="detail-item">🥤 보급: ${race.supply}</div>
-                    <div class="detail-item">🎁 기념품: ${race.gift}</div>
-                    <div class="detail-item">💰 가성비: ${race.cost}</div>
+                    <div class="detail-item">🛣️ 코스: ${race.avgCourse}</div>
+                    <div class="detail-item">🚩 운영: ${race.avgOrg}</div>
+                    <div class="detail-item">🥤 보급: ${race.avgSupply}</div>
+                    <div class="detail-item)🎁 기념품: ${race.avgGift}</div>
+                    <div class="detail-item">💰 가성비: ${race.avgCost}</div>
                 </div>
                 
                 <button class="toggle-review-btn" onclick="toggleForm('form-${idx}')">✍️ 이 대회 평점 남기기</button>
@@ -138,7 +144,7 @@
                         </div>
                     `).join('')}
                     <textarea id="msg-${idx}" placeholder="대회에 대한 솔직한 후기를 남겨주세요." style="width:100%; border-radius:15px; border:1px solid #ddd; padding:15px; margin-top:10px; box-sizing:border-box;"></textarea>
-                    <button class="submit-btn" onclick="submitReview('${race.title}', ${idx})">리뷰 저장</button>
+                    <button class="submit-btn" onclick="submitReview('${race.id}', ${idx})">리뷰 저장</button>
                 </div>
             </div>
         `).join('');
@@ -149,14 +155,18 @@
         f.style.display = (f.style.display === 'block') ? 'none' : 'block';
     }
 
-    async function submitReview(raceName, idx) {
+    // [D] 리뷰 데이터 제출 (schedule_id 포함)
+    async function submitReview(raceId, idx) {
         const getVal = (cat) => {
             const el = document.querySelector(`input[name="rate-${cat}-${idx}"]:checked`);
             return el ? parseInt(el.value) : 5;
         };
 
+        const title = document.getElementById(`race-title-${idx}`).innerText;
+
         const review = {
-            marathon_name: raceName,
+            schedule_id: raceId, // ⭐ 고유 ID 연동
+            marathon_name: title, // 참고용 이름
             rating_course: getVal('course'),
             rating_organize: getVal('org'),
             rating_supply: getVal('supply'),
@@ -169,8 +179,8 @@
         review.rating_total = parseFloat(((review.rating_course + review.rating_organize + review.rating_supply + review.rating_souvenir + review.rating_cost) / 5).toFixed(1));
 
         const { error } = await _supabase.from('reviews').insert([review]);
-        if (error) alert('실패: ' + error.message);
-        else { alert('리뷰가 저장되었습니다!'); location.reload(); }
+        if (error) alert('저장 실패: ' + error.message);
+        else { alert('평점이 성공적으로 저장되었습니다!'); location.reload(); }
     }
 
     window.onload = loadAndRender;
