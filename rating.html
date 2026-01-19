@@ -8,7 +8,7 @@
     <script src="config.js"></script>
     <style>
         :root { --main-color: #e91e63; --bg-color: #f0f2f5; --major-gold: #f1c40f; --star-color: #ffc107; }
-        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; color: #333; }
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; color: #333; line-height: 1.6; }
         
         /* 공통 네비게이션 */
         .nav-container { background: white; border-bottom: 1px solid #eee; display: flex; justify-content: center; padding: 12px 0; gap: 15px; position: sticky; top: 0; z-index: 100; }
@@ -17,18 +17,34 @@
 
         .container { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
         
-        /* 카드 디자인 */
-        .race-card { background: white; border-radius: 24px; padding: 1.8rem; margin-bottom: 1.5rem; box-shadow: 0 8px 20px rgba(0,0,0,0.04); position: relative; border: 2px solid transparent; }
+        /* 카드 디자인 및 레이아웃 */
+        .race-card { background: white; border-radius: 24px; padding: 1.8rem; margin-bottom: 1.5rem; box-shadow: 0 8px 20px rgba(0,0,0,0.04); position: relative; border: 2px solid transparent; transition: 0.3s; }
         .race-card.is-major { border-color: var(--major-gold); background: #fffdf5; }
-        .major-badge { position: absolute; top: -12px; left: 24px; background: var(--major-gold); color: #333; font-size: 0.75rem; font-weight: 800; padding: 5px 14px; border-radius: 10px; }
+        .major-badge { position: absolute; top: -12px; left: 24px; background: var(--major-gold); color: #333; font-size: 0.75rem; font-weight: 800; padding: 5px 14px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         
         .race-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
         .star-display { color: var(--star-color); font-size: 1.4rem; letter-spacing: 2px; }
         .total-score-num { font-size: 2.2rem; font-weight: 900; color: var(--main-color); line-height: 1; }
         
-        /* 항상 노출되는 세부 지표 */
-        .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; border-top: 1px solid #f1f3f5; padding-top: 18px; margin-bottom: 15px; }
-        .detail-item { background: #f8f9fa; padding: 10px 5px; border-radius: 12px; text-align: center; font-size: 0.82rem; font-weight: 700; color: #555; }
+        /* 세부 지표 그리드 (레이아웃 깨짐 방지 최적화) */
+        .detail-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(95px, 1fr)); 
+            gap: 8px; 
+            border-top: 1px solid #f1f3f5; 
+            padding-top: 18px; 
+            margin-bottom: 15px; 
+        }
+        .detail-item { 
+            background: #f8f9fa; 
+            padding: 10px 4px; 
+            border-radius: 12px; 
+            text-align: center; 
+            font-size: 0.78rem; 
+            font-weight: 700; 
+            color: #555; 
+            white-space: nowrap; 
+        }
 
         /* 클릭형 별점 입력 UI */
         .review-form-section { display: none; margin-top: 20px; padding: 25px; background: #fffafa; border-radius: 20px; border: 1px dashed var(--main-color); }
@@ -38,8 +54,11 @@
         .star-rating label { font-size: 1.5rem; color: #ddd; cursor: pointer; transition: 0.2s; }
         .star-rating label:hover, .star-rating label:hover ~ label, .star-rating input:checked ~ label { color: var(--star-color); }
         
-        .toggle-review-btn { width: 100%; background: white; border: 1.5px solid var(--main-color); color: var(--main-color); padding: 12px; border-radius: 15px; font-weight: bold; cursor: pointer; }
+        .toggle-review-btn { width: 100%; background: white; border: 1.5px solid var(--main-color); color: var(--main-color); padding: 12px; border-radius: 15px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .toggle-review-btn:hover { background: var(--main-color); color: white; }
         .submit-btn { width: 100%; padding: 15px; background: var(--main-color); color: white; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+
+        footer { text-align: center; padding: 4rem 0; color: #adb5bd; font-size: 0.85rem; }
     </style>
 </head>
 <body>
@@ -52,12 +71,16 @@
 
 <div class="container">
     <h2 style="font-size: 1.8rem; margin-bottom: 0.5rem;">⭐ RunStandard 레이스 리포트</h2>
-    <p style="color: #888; margin-bottom: 2rem;">마스터 ID를 기반으로 관리되는 정식 대회 평점 시스템입니다.</p>
+    <p style="color: #888; margin-bottom: 2rem; font-weight: 500;">마스터 데이터 ID를 기반으로 관리되는 정식 대회 평점 리스트입니다.</p>
     
     <div id="race-list">
-        <p style="text-align: center; padding: 3rem; color: #adb5bd;">데이터를 동기화 중입니다...</p>
+        <p style="text-align: center; padding: 3rem; color: #adb5bd; font-weight: 600;">마스터 데이터를 동기화 중입니다...</p>
     </div>
 </div>
+
+<footer>
+    <p>© 2026 RunStandard. 공정한 레이스 문화를 지향합니다.</p>
+</footer>
 
 <script>
     const _supabase = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
@@ -68,14 +91,14 @@
         return '★'.repeat(rating) + '☆'.repeat(5 - rating);
     }
 
-    // [B] 데이터 로드 및 연동 (ID 기반)
+    // [B] 데이터 로드 및 ID 기반 매칭
     async function loadAndRender() {
         const { data: schedules } = await _supabase.from('schedules').select('*');
         const { data: reviews } = await _supabase.from('reviews').select('*');
 
         if (!schedules) return;
 
-        // 마스터 리스트를 순회하며 ID가 일치하는 리뷰만 집계
+        // 마스터(schedules)를 기준으로 리뷰 집계
         const raceList = schedules.map(race => {
             const matchedReviews = reviews ? reviews.filter(rev => rev.schedule_id === race.id) : [];
             const count = matchedReviews.length;
@@ -97,13 +120,13 @@
             };
         });
 
-        // 3단계 정렬: 메이저 우선 -> 날짜 최신순
+        // 3단계 정렬: 메이저 우선 -> 개최일 최신순
         raceList.sort((a, b) => (b.is_major - a.is_major) || (new Date(b.race_date) - new Date(a.race_date)));
 
         render(raceList);
     }
 
-    // [C] 카드 렌더링
+    // [C] 카드 렌더링 (오타 수정 및 레이아웃 안정화)
     function render(data) {
         const container = document.getElementById('race-list');
         container.innerHTML = data.map((race, idx) => `
@@ -117,7 +140,7 @@
                     <div style="text-align:right;">
                         <div class="star-display">${getStarDisplay(race.avgTotal)}</div>
                         <div class="total-score-num">${race.avgTotal}</div>
-                        <div style="font-size:0.75rem; color:#adb5bd;">${race.count}개의 리포트</div>
+                        <div style="font-size:0.75rem; color:#adb5bd; font-weight:600;">${race.count}개의 리포트</div>
                     </div>
                 </div>
 
@@ -125,7 +148,7 @@
                     <div class="detail-item">🛣️ 코스: ${race.avgCourse}</div>
                     <div class="detail-item">🚩 운영: ${race.avgOrg}</div>
                     <div class="detail-item">🥤 보급: ${race.avgSupply}</div>
-                    <div class="detail-item)🎁 기념품: ${race.avgGift}</div>
+                    <div class="detail-item">🎁 기념품: ${race.avgGift}</div>
                     <div class="detail-item">💰 가성비: ${race.avgCost}</div>
                 </div>
                 
@@ -143,7 +166,7 @@
                             </div>
                         </div>
                     `).join('')}
-                    <textarea id="msg-${idx}" placeholder="대회에 대한 솔직한 후기를 남겨주세요." style="width:100%; border-radius:15px; border:1px solid #ddd; padding:15px; margin-top:10px; box-sizing:border-box;"></textarea>
+                    <textarea id="msg-${idx}" placeholder="대회에 대한 솔직한 후기를 남겨주세요." style="width:100%; border-radius:15px; border:1px solid #ddd; padding:15px; margin-top:10px; box-sizing:border-box; font-family:inherit;"></textarea>
                     <button class="submit-btn" onclick="submitReview('${race.id}', ${idx})">리뷰 저장</button>
                 </div>
             </div>
@@ -155,7 +178,7 @@
         f.style.display = (f.style.display === 'block') ? 'none' : 'block';
     }
 
-    // [D] 리뷰 데이터 제출 (schedule_id 포함)
+    // [D] 리뷰 데이터 제출 (schedule_id 고유 ID 저장)
     async function submitReview(raceId, idx) {
         const getVal = (cat) => {
             const el = document.querySelector(`input[name="rate-${cat}-${idx}"]:checked`);
@@ -165,8 +188,8 @@
         const title = document.getElementById(`race-title-${idx}`).innerText;
 
         const review = {
-            schedule_id: raceId, // ⭐ 고유 ID 연동
-            marathon_name: title, // 참고용 이름
+            schedule_id: raceId,
+            marathon_name: title,
             rating_course: getVal('course'),
             rating_organize: getVal('org'),
             rating_supply: getVal('supply'),
