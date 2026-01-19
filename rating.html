@@ -40,12 +40,11 @@
         .rev-stars { color: var(--star-color); font-size: 0.8rem; }
         .rev-comment { font-size: 0.9rem; color: #444; margin: 10px 0; white-space: pre-line; }
         
-        .rev-detail-grid { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
-        .rev-detail-tag { font-size: 0.7rem; background: #eee; padding: 2px 8px; border-radius: 5px; color: #777; font-weight: 600; }
+        /* 개별 지표 배지 스타일 (텍스트 포함 버전) */
+        .rev-detail-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+        .rev-detail-tag { font-size: 0.72rem; background: #f1f3f5; padding: 3px 10px; border-radius: 8px; color: #666; font-weight: 700; border: 1px solid #e9ecef; }
 
-        /* 더보기 버튼 */
         .more-reviews-btn { width: 100%; padding: 12px; background: white; border: 1px solid #ddd; border-radius: 12px; color: #666; font-size: 0.85rem; font-weight: bold; cursor: pointer; margin-top: 5px; transition: 0.2s; }
-        .more-reviews-btn:hover { background: #f1f1f1; }
 
         .review-form-section { display: none; margin-top: 20px; padding: 25px; background: #fffafa; border-radius: 20px; border: 1px dashed var(--main-color); }
         .star-rating { display: flex; flex-direction: row-reverse; gap: 5px; }
@@ -95,7 +94,6 @@
         render(raceList);
     }
 
-    // [C] 렌더링 함수: 5개 초과분은 숨김 처리
     function render(data) {
         const container = document.getElementById('race-list');
         container.innerHTML = data.map((race, idx) => {
@@ -121,7 +119,7 @@
                     <div id="form-${idx}" class="review-form-section">
                         ${['course', 'org', 'supply', 'gift', 'cost'].map(cat => `
                             <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                                <label style="font-size:0.9rem; font-weight:bold;">${cat === 'course' ? '🛣️' : cat === 'org' ? '🚩' : cat === 'supply' ? '🥤' : cat === 'gift' ? '🎁' : '💰'} ${cat.toUpperCase()}</label>
+                                <label style="font-size:0.9rem; font-weight:bold;">${cat === 'course' ? '🛣️ 코스' : cat === 'org' ? '🚩 운영' : cat === 'supply' ? '🥤 보급' : cat === 'gift' ? '🎁 선물' : '💰 가성비'}</label>
                                 <div class="star-rating">${[5,4,3,2,1].map(n => `<input type="radio" id="st-${cat}-${n}-${idx}" name="r-${cat}-${idx}" value="${n}"><label for="st-${cat}-${n}-${idx}">★</label>`).join('')}</div>
                             </div>
                         `).join('')}
@@ -144,29 +142,30 @@
         }).join('');
     }
 
-    // 리뷰 아이템 HTML 생성 헬퍼
+    // [핵심] 개별 리뷰 HTML 생성 (텍스트 추가 버전)
     function createReviewHTML(rev) {
         return `
             <div class="individual-review">
-                <div class="rev-user-info"><span class="rev-nickname">👤 ${getRandomNickname()}</span><span class="rev-date">${new Date(rev.created_at).toLocaleDateString()}</span></div>
+                <div class="rev-user-info">
+                    <span class="rev-nickname">👤 ${getRandomNickname()}</span>
+                    <span class="rev-date">${new Date(rev.created_at).toLocaleDateString()}</span>
+                </div>
                 <div class="rev-stars">${getStarHTML(rev.rating_total)}</div>
                 <p class="rev-comment">${rev.comment || '평점 리포트입니다.'}</p>
                 <div class="rev-detail-grid">
-                    <span class="rev-detail-tag">🛣️${rev.rating_course}</span><span class="rev-detail-tag">🚩${rev.rating_organize}</span>
-                    <span class="rev-detail-tag">🥤${rev.rating_supply}</span><span class="rev-detail-tag">🎁${rev.rating_souvenir}</span>
-                    <span class="rev-detail-tag">💰${rev.rating_cost}</span>
+                    <span class="rev-detail-tag">🛣️ 코스 ${rev.rating_course}</span>
+                    <span class="rev-detail-tag">🚩 운영 ${rev.rating_organize}</span>
+                    <span class="rev-detail-tag">🥤 보급 ${rev.rating_supply}</span>
+                    <span class="rev-detail-tag">🎁 선물 ${rev.rating_souvenir}</span>
+                    <span class="rev-detail-tag">💰 가성비 ${rev.rating_cost}</span>
                 </div>
             </div>
         `;
     }
 
-    // [D] 더보기 버튼 클릭 시 호출되는 함수
     function showAllReviews(idx) {
-        const extraFeed = document.getElementById(`extra-feed-${idx}`);
-        const moreBtn = document.getElementById(`btn-more-${idx}`);
-        
-        extraFeed.style.display = 'block'; // 숨겨진 리뷰 노출
-        moreBtn.style.display = 'none';    // 버튼 숨기기
+        document.getElementById(`extra-feed-${idx}`).style.display = 'block';
+        document.getElementById(`btn-more-${idx}`).style.display = 'none';
     }
 
     function toggleForm(id) {
