@@ -17,6 +17,7 @@
 
         .container { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
         
+        /* 메인 카드 */
         .race-card { background: white; border-radius: 24px; padding: 1.8rem; margin-bottom: 1.5rem; box-shadow: 0 8px 20px rgba(0,0,0,0.04); position: relative; border: 2px solid transparent; }
         .race-card.is-major { border-color: var(--major-gold); background: #fffdf5; }
         .major-badge { position: absolute; top: -12px; left: 24px; background: var(--major-gold); color: #333; font-size: 0.75rem; font-weight: 800; padding: 5px 14px; border-radius: 10px; z-index: 1; }
@@ -29,6 +30,7 @@
         .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(95px, 1fr)); gap: 8px; border-top: 1px solid #f1f3f5; padding-top: 18px; margin-bottom: 15px; }
         .detail-item { background: var(--bg-light); padding: 10px 4px; border-radius: 12px; text-align: center; font-size: 0.78rem; font-weight: 700; color: #555; }
 
+        /* 리뷰 피드 스타일 */
         .review-feed { margin-top: 20px; background: #fafafa; border-radius: 15px; padding: 15px; }
         .feed-title { font-size: 0.9rem; font-weight: 800; color: #666; margin-bottom: 12px; }
         .individual-review { background: white; border-radius: 12px; padding: 15px; margin-bottom: 10px; border: 1px solid #eee; }
@@ -38,10 +40,11 @@
         .rev-stars { color: var(--star-color); font-size: 0.8rem; }
         .rev-comment { font-size: 0.9rem; color: #444; margin: 10px 0; white-space: pre-line; }
         
+        /* 지표 배지 스타일 */
         .rev-detail-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
         .rev-detail-tag { font-size: 0.72rem; background: #f1f3f5; padding: 3px 10px; border-radius: 8px; color: #666; font-weight: 700; border: 1px solid #e9ecef; }
 
-        .more-reviews-btn { width: 100%; padding: 12px; background: white; border: 1px solid #ddd; border-radius: 12px; color: #666; font-size: 0.85rem; font-weight: bold; cursor: pointer; margin-top: 5px; }
+        .more-reviews-btn { width: 100%; padding: 12px; background: white; border: 1px solid #ddd; border-radius: 12px; color: #666; font-size: 0.85rem; font-weight: bold; cursor: pointer; margin-top: 5px; transition: 0.2s; }
 
         .review-form-section { display: none; margin-top: 20px; padding: 25px; background: #fffafa; border-radius: 20px; border: 1px dashed var(--main-color); }
         .star-rating { display: flex; flex-direction: row-reverse; gap: 5px; }
@@ -145,6 +148,7 @@
         }).join('');
     }
 
+    // [핵심] 기본 문구가 수정된 리뷰 HTML 생성 헬퍼
     function createReviewHTML(rev) {
         const displayId = rev.user_id || "익명러너_00000"; 
         return `
@@ -154,8 +158,7 @@
                     <span class="rev-date">${new Date(rev.created_at).toLocaleDateString()}</span>
                 </div>
                 <div class="rev-stars">${getStarHTML(rev.rating_total)}</div>
-                <p class="rev-comment">${rev.comment || '평점 리포트입니다.'}</p>
-                <div class="rev-detail-grid">
+                <p class="rev-comment">${rev.comment || '평점만 남긴 리뷰입니다.'}</p> <div class="rev-detail-grid">
                     <span class="rev-detail-tag">🛣️ 코스 ${rev.rating_course}</span>
                     <span class="rev-detail-tag">🚩 운영 ${rev.rating_organize}</span>
                     <span class="rev-detail-tag">🥤 보급 ${rev.rating_supply}</span>
@@ -199,7 +202,9 @@
             rating_cost: getVal('cost'), comment: document.getElementById(`msg-${idx}`).value,
             race_date: new Date().toISOString().split('T')[0]
         };
-        review.rating_total = parseFloat(((review.rating_course + review.rating_organize + review.rating_supply + review.rating_souvenir + review.rating_cost) / 5).toFixed(1));
+        
+        // 데이터 타입 에러 방지를 위해 Number로 변환
+        review.rating_total = Number(((review.rating_course + review.rating_organize + review.rating_supply + review.rating_souvenir + review.rating_cost) / 5).toFixed(1));
 
         const { error } = await _supabase.from('reviews').insert([review]);
         if (error) alert(error.message);
