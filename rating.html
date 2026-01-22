@@ -27,9 +27,14 @@
         .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(95px, 1fr)); gap: 8px; border-top: 1px solid #f1f3f5; padding-top: 18px; margin-bottom: 15px; }
         .detail-item { background: var(--bg-light); padding: 10px 4px; border-radius: 12px; text-align: center; font-size: 0.78rem; font-weight: 700; color: #555; }
 
-        /* 토글 버튼 디자인 */
-        .toggle-feed-btn { width: 100%; padding: 12px; background: #f8f9fa; border: 1px solid #eee; border-radius: 12px; color: #888; font-size: 0.85rem; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
-        .toggle-feed-btn.active { background: var(--main-color); color: white; border-color: var(--main-color); }
+        /* 🔘 토글 버튼 디자인 (기획 반영) */
+        .toggle-feed-btn { width: 100%; padding: 14px; border-radius: 14px; font-size: 0.9rem; font-weight: 800; cursor: pointer; transition: 0.3s; margin-top: 10px; border: none; }
+        
+        /* 닫혀있을 때: 강조색 (핑크) */
+        .toggle-feed-btn.closed { background: var(--main-color); color: white; box-shadow: 0 4px 12px rgba(233, 30, 99, 0.2); }
+        
+        /* 열려있을 때: 비강조색 (회색) */
+        .toggle-feed-btn.open { background: #f1f3f5; color: #adb5bd; border: 1px solid #eee; }
 
         .review-feed { margin-top: 15px; background: #fafafa; border-radius: 15px; padding: 15px; display: none; }
         .individual-review { background: white; border-radius: 12px; padding: 15px; margin-bottom: 10px; border: 1px solid #eee; }
@@ -37,7 +42,6 @@
         .rev-comment { font-size: 0.9rem; color: #444; margin: 10px 0; white-space: pre-line; }
         .rev-detail-tag { font-size: 0.72rem; background: #f1f3f5; padding: 3px 10px; border-radius: 8px; color: #666; font-weight: 700; border: 1px solid #e9ecef; margin-right: 5px; }
 
-        /* 평점 입력 버그 수정용 CSS */
         .star-rating { display: flex; flex-direction: row-reverse; gap: 5px; }
         .star-rating input { display: none; }
         .star-rating label { font-size: 1.8rem; color: #ddd; cursor: pointer; transition: 0.2s; }
@@ -113,7 +117,8 @@
                     </div>
 
                     <button class="toggle-review-btn" onclick="toggleForm('form-${idx}')">✍️ 이 대회 평점 남기기</button>
-                    <button class="toggle-feed-btn" onclick="toggleFeed('feed-container-${idx}', this)">러너 리포트 보기 (${race.count}) ▾</button>
+                    
+                    <button class="toggle-feed-btn closed" onclick="toggleFeed('feed-container-${idx}', this)">러너 후기 열기 (${race.count}) ▾</button>
 
                     <div id="form-${idx}" class="review-form-section">
                         ${['course', 'org', 'supply', 'gift', 'cost'].map(cat => `
@@ -139,19 +144,22 @@
         }).join('');
     }
 
-    // [핵심] 토글 시 버튼 색상 변경 로직 적용
+    // [핵심] 토글 시 텍스트 및 클래스(색상) 변경
     function toggleFeed(id, btn) {
         const feed = document.getElementById(id);
-        const isHidden = feed.style.display === 'none' || feed.style.display === '';
+        const isOpening = feed.style.display === 'none' || feed.style.display === '';
+        const count = btn.innerText.match(/\d+/)[0]; // 기존 버튼에서 숫자 추출
         
-        feed.style.display = isHidden ? 'block' : 'none';
+        feed.style.display = isOpening ? 'block' : 'none';
         
-        if (isHidden) {
-            btn.classList.add('active'); // 눈에 띄는 색상(핑크) 적용
-            btn.innerText = '러너 리포트 닫기 ▴';
+        if (isOpening) {
+            btn.classList.remove('closed');
+            btn.classList.add('open');
+            btn.innerText = '러너 후기 닫기 ▴';
         } else {
-            btn.classList.remove('active');
-            btn.innerText = `러너 리포트 보기 (${btn.innerText.match(/\d+/)[0]}) ▾`;
+            btn.classList.remove('open');
+            btn.classList.add('closed');
+            btn.innerText = `러너 후기 열기 (${count}) ▾`;
         }
     }
 
