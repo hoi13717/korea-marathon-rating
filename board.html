@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>런스탠다드 | 마라톤 평점 커뮤니티</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <style>
+        :root { --main-color: #e91e63; --bg-color: #f0f2f5; --bg-light: #f8f9fa; }
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; color: #333; line-height: 1.6; }
+        
+        /* 네비게이션 */
+        .nav-container { background: white; border-bottom: 1px solid #eee; display: flex; justify-content: center; padding: 12px 0; gap: 15px; position: sticky; top: 0; z-index: 100; }
+        .nav-item { text-decoration: none; color: #666; font-size: 0.95rem; font-weight: 600; padding: 10px 20px; border-radius: 25px; transition: 0.3s; }
+        .nav-item.active { background: var(--main-color); color: white; box-shadow: 0 4px 10px rgba(233, 30, 99, 0.2); }
+
+        .container { max-width: 800px; margin: 1rem auto; padding: 0 1rem; }
+        
+        /* 📏 컴팩트 헤더 & 검색 */
+        .page-header { background: white; border-radius: 20px; padding: 1rem 1.5rem; margin-bottom: 0.8rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .header-title { font-size: 1.4rem; font-weight: 900; color: #1a1a1a; margin-bottom: 4px; }
+        .header-subtitle { color: #e91e63; font-weight: 700; font-size: 0.85rem; }
+
+        .search-container { margin-bottom: 1rem; display: flex; gap: 10px; }
+        #search-input { flex: 1; padding: 10px 20px; border-radius: 15px; border: 2px solid white; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.04); font-size: 0.95rem; outline: none; }
+        .write-btn { padding: 10px 25px; background: var(--main-color); color: white; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; transition: 0.2s; }
+
+        /* 📋 게시글 목록 카드 */
+        .post-card { background: white; border-radius: 20px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.04); cursor: pointer; transition: 0.2s; }
+        .post-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+        .post-category { display: inline-block; padding: 3px 10px; border-radius: 6px; background: #fff0f5; color: var(--main-color); font-size: 0.75rem; font-weight: 800; margin-bottom: 8px; }
+        .post-title { font-size: 1.15rem; font-weight: 800; margin-bottom: 8px; color: #222; }
+        .post-meta { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #999; font-weight: 500; }
+
+        /* ✍️ 글쓰기 양식 (초기 숨김) */
+        #write-section { display: none; background: white; border-radius: 24px; padding: 2rem; margin-bottom: 1.5rem; box-shadow: 0 8px 25px rgba(0,0,0,0.05); }
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; font-weight: 800; font-size: 0.9rem; margin-bottom: 8px; color: #555; }
+        .form-input { width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #eee; background: #fcfcfc; box-sizing: border-box; font-size: 1rem; }
+        .form-textarea { width: 100%; height: 200px; padding: 15px; border-radius: 12px; border: 1px solid #eee; background: #fcfcfc; box-sizing: border-box; font-size: 1rem; resize: none; }
+        .submit-group { display: flex; gap: 10px; }
+        .cancel-btn { flex: 1; padding: 15px; background: #eee; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; }
+        .save-btn { flex: 2; padding: 15px; background: var(--main-color); color: white; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<nav class="nav-container">
+    <a href="index.html" class="nav-item">홈</a>
+    <a href="rating.html" class="nav-item">대회평점</a>
+    <a href="schedule.html" class="nav-item">대회일정</a>
+    <a href="board.html" class="nav-item active">커뮤니티</a>
+</nav>
+
+<div class="container">
+    <div class="page-header">
+        <div class="header-title">💬 러너 광장</div>
+        <div class="header-subtitle">런스탠다드에서 자유롭게 달리기 이야기를 나누어 보세요.</div>
+    </div>
+
+    <div class="search-container">
+        <input type="text" id="search-input" placeholder="관심 있는 키워드를 검색하세요..." onkeyup="filterPosts()">
+        <button class="write-btn" onclick="toggleWriteSection(true)">글쓰기</button>
+    </div>
+
+    <div id="write-section">
+        <h3 style="margin-top:0;">글 작성하기</h3>
+        <div class="form-group">
+            <label>카테고리</label>
+            <select id="post-category" class="form-input">
+                <option value="자유">자유수다</option>
+                <option value="훈련">훈련방법</option>
+                <option value="장비">러닝장비</option>
+                <option value="대회">대회후기</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>제목</label>
+            <input type="text" id="post-title" class="form-input" placeholder="제목을 입력하세요.">
+        </div>
+        <div class="form-group">
+            <label>내용</label>
+            <textarea id="post-content" class="form-textarea" placeholder="러너들과 나누고 싶은 이야기를 적어주세요."></textarea>
+        </div>
+        <div class="submit-group">
+            <button class="cancel-btn" onclick="toggleWriteSection(false)">취소</button>
+            <button class="save-btn" onclick="savePost()">등록하기</button>
+        </div>
+    </div>
+
+    <div id="post-list">
+        <p style="text-align: center; padding: 3rem; color: #adb5bd;">게시글을 불러오는 중...</p>
+    </div>
+</div>
+
+<script>
+    const _supabase = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+    let allPosts = [];
+
+    // [A] 고유 ID 시스템 (rating.html과 동일 로직)
+    const NICKNAMES = ["풀코스완주자", "보급소털이범", "러닝은장비빨", "카본화성애자", "대회수집가", "아미노바이탈중독", "서브3꿈나무", "업힐요정"];
+    function generateUniqueId() {
+        const nick = NICKNAMES[Math.floor(Math.random() * NICKNAMES.length)];
+        const randNum = Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000;
+        return `${nick}_${randNum}`;
+    }
+
+    // [B] 데이터 로드 및 렌더링
+    async function loadPosts() {
+        const { data, error } = await _supabase.from('posts').select('*').order('created_at', { ascending: false });
+        if (error) return;
+        allPosts = data;
+        renderPosts(allPosts);
+    }
+
+    function renderPosts(posts) {
+        const container = document.getElementById('post-list');
+        if (posts.length === 0) {
+            container.innerHTML = '<p style="text-align: center; padding: 3rem; color: #adb5bd;">작성된 게시글이 없습니다.</p>';
+            return;
+        }
+        container.innerHTML = posts.map(post => `
+            <div class="post-card">
+                <span class="post-category">${post.category}</span>
+                <div class="post-title">${post.title}</div>
+                <div class="post-meta">
+                    <span>👤 ${post.author_id}</span>
+                    <span>📅 ${new Date(post.created_at).toLocaleDateString()}</span>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // [C] 검색 필터링
+    function filterPosts() {
+        const query = document.getElementById('search-input').value.toLowerCase();
+        const filtered = allPosts.filter(p => p.title.toLowerCase().includes(query) || p.content.toLowerCase().includes(query));
+        renderPosts(filtered);
+    }
+
+    // [D] 글쓰기 섹션 토글
+    function toggleWriteSection(show) {
+        document.getElementById('write-section').style.display = show ? 'block' : 'none';
+        document.getElementById('post-list').style.display = show ? 'none' : 'block';
+        if (show) window.scrollTo(0, 0);
+    }
+
+    // [E] 글 저장
+    async function savePost() {
+        const title = document.getElementById('post-title').value;
+        const content = document.getElementById('post-content').value;
+        const category = document.getElementById('post-category').value;
+
+        if (!title || !content) {
+            alert('제목과 내용을 모두 입력해주세요.');
+            return;
+        }
+
+        const newPost = {
+            title,
+            content,
+            category,
+            author_id: generateUniqueId() // 고유 익명 ID 부여
+        };
+
+        const { error } = await _supabase.from('posts').insert([newPost]);
+        if (error) {
+            alert('등록 실패: ' + error.message);
+        } else {
+            alert('글이 등록되었습니다!');
+            location.reload();
+        }
+    }
+
+    window.onload = loadPosts;
+</script>
+</body>
+</html>
