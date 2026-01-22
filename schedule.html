@@ -8,130 +8,59 @@
     <script src="config.js"></script>
     <style>
         :root { --main-color: #e91e63; --bg-color: #f0f2f5; --major-gold: #f1c40f; }
-        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; color: #333; line-height: 1.6; }
-        
-        /* 네비게이션 */
-        .nav-container { background: white; border-bottom: 1px solid #eee; display: flex; justify-content: center; padding: 12px 0; gap: 15px; position: sticky; top: 0; z-index: 100; }
-        .nav-item { text-decoration: none; color: #666; font-size: 0.95rem; font-weight: 600; padding: 10px 20px; border-radius: 25px; transition: 0.3s; }
-        .nav-item.active { background: var(--main-color); color: white; box-shadow: 0 4px 10px rgba(233, 30, 99, 0.2); }
-
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; }
         .container { max-width: 800px; margin: 1rem auto; padding: 0 1rem; }
-        
-        /* 📏 소개 영역: 크기 절반 이하 축소 */
         .page-header { background: white; border-radius: 20px; padding: 1rem 1.5rem; margin-bottom: 0.8rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-        .header-title { font-size: 1.4rem; font-weight: 900; color: #1a1a1a; margin-bottom: 4px; }
-        .header-subtitle { color: #e91e63; font-weight: 700; font-size: 0.85rem; line-height: 1.4; word-break: keep-all; }
-
-        /* 🔍 검색 영역: 크기 절반 이하 축소 */
-        .search-container { margin-bottom: 1.2rem; }
-        #search-input { width: 100%; padding: 10px 20px; border-radius: 15px; border: 2px solid white; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.04); font-size: 0.95rem; font-weight: 600; box-sizing: border-box; outline: none; transition: 0.3s; }
-        #search-input:focus { border-color: var(--main-color); }
-
-        /* 🏆 대회 카드 및 MAJOR 강조 스타일 */
-        .race-card { background: white; border-radius: 24px; padding: 1.8rem; margin-bottom: 1.5rem; box-shadow: 0 8px 20px rgba(0,0,0,0.04); position: relative; border: 2px solid transparent; }
+        .header-title { font-size: 1.4rem; font-weight: 900; margin-bottom: 4px; }
+        .search-input { width: 100%; padding: 10px 20px; border-radius: 15px; border: 2px solid white; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.04); font-size: 0.95rem; outline: none; margin-bottom: 1.2rem; }
+        .race-card { background: white; border-radius: 24px; padding: 1.8rem; margin-bottom: 1.5rem; position: relative; border: 2px solid transparent; box-shadow: 0 8px 20px rgba(0,0,0,0.04); }
         .race-card.is-major { border-color: var(--major-gold); background: #fffdf5; }
-        .major-badge { position: absolute; top: -12px; left: 24px; background: var(--major-gold); color: #333; font-size: 0.75rem; font-weight: 800; padding: 5px 14px; border-radius: 10px; z-index: 1; }
-        
-        .race-status { display: inline-block; padding: 4px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; background: #eee; color: #888; margin-bottom: 10px; }
-        .race-title { font-size: 1.3rem; font-weight: 900; margin: 0 0 10px 0; }
-        .tag-group { display: flex; gap: 8px; margin-bottom: 15px; }
-        .tag-item { background: #f1f3f5; padding: 4px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; color: #666; }
-        
-        /* 상세 정보 영역 (기본 숨김) */
-        .detail-info { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; }
-        .info-item { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: #666; margin-bottom: 6px; }
-
-        /* 🔘 더보기 버튼 */
-        .more-btn { width: 100%; padding: 12px; background: #f8f9fa; border: 1px solid #eee; border-radius: 12px; color: #888; font-size: 0.85rem; font-weight: bold; cursor: pointer; margin-top: 15px; transition: 0.2s; }
-        .more-btn:hover { background: #f1f1f1; color: var(--main-color); }
+        .major-badge { position: absolute; top: -12px; left: 24px; background: var(--major-gold); color: #333; font-size: 0.75rem; font-weight: 800; padding: 5px 14px; border-radius: 10px; }
+        .detail-info { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; font-size: 0.9rem; color: #666; }
+        .more-btn { width: 100%; padding: 12px; background: #f8f9fa; border: 1px solid #eee; border-radius: 12px; color: #888; font-size: 0.85rem; font-weight: bold; cursor: pointer; margin-top: 15px; }
     </style>
 </head>
 <body>
-
-<nav class="nav-container">
-    <a href="index.html" class="nav-item">홈</a>
-    <a href="rating.html" class="nav-item">대회평점</a>
-    <a href="schedule.html" class="nav-item active">대회일정</a>
-</nav>
-
+<script src="navbar.js"></script>
 <div class="container">
     <div class="page-header">
         <div class="header-title">📅 2026 레이스 캘린더</div>
-        <div class="header-subtitle">전국의 주요 대회 일정을 관리자가 직접 검증하여 안내합니다.</div>
+        <p style="color:var(--main-color); font-weight:700; font-size:0.85rem;">전국의 주요 대회 일정을 관리자가 직접 검증하여 안내합니다.</p>
     </div>
-
-    <div class="search-container">
-        <input type="text" id="search-input" placeholder="대회명 또는 지역으로 검색..." onkeyup="filterSchedules()">
-    </div>
-    
-    <div id="schedule-list"><p style="text-align: center; padding: 3rem; color: #adb5bd;">대회 일정을 불러오는 중...</p></div>
+    <input type="text" class="search-input" placeholder="대회명 또는 지역으로 검색..." onkeyup="filterSchedules()">
+    <div id="schedule-list"></div>
 </div>
-
 <script>
     const _supabase = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-    let allScheduleData = [];
-
-    async function loadSchedules() {
-        const { data, error } = await _supabase.from('schedules').select('*').order('race_date', { ascending: true });
-        if (error) return;
-        allScheduleData = data;
-        renderSchedules(allScheduleData);
+    let allData = [];
+    async function load() {
+        const { data } = await _supabase.from('schedules').select('*').order('race_date', { ascending: true });
+        allData = data;
+        render(allData);
     }
-
-    function filterSchedules() {
-        const query = document.getElementById('search-input').value.toLowerCase();
-        const filtered = allScheduleData.filter(race => 
-            race.title.toLowerCase().includes(query) || 
-            (race.location && race.location.toLowerCase().includes(query))
-        );
-        renderSchedules(filtered);
-    }
-
-    function renderSchedules(data) {
-        const container = document.getElementById('schedule-list');
-        if (data.length === 0) {
-            container.innerHTML = '<p style="text-align: center; padding: 3rem; color: #adb5bd;">검색 결과가 없습니다.</p>';
-            return;
-        }
-
-        container.innerHTML = data.map((race, idx) => `
+    function render(data) {
+        document.getElementById('schedule-list').innerHTML = data.map((race, idx) => `
             <div class="race-card ${race.is_major ? 'is-major' : ''}">
                 ${race.is_major ? '<div class="major-badge">RUNSTANDARD MAJOR</div>' : ''}
-                
-                <div class="race-status">접수 준비중</div>
-                <h3 class="race-title">${race.title}</h3>
-                
-                <div class="tag-group">
-                    <span class="tag-item">10km</span>
-                    <span class="tag-item">Full</span>
-                </div>
-                
+                <div style="display:inline-block; padding:4px 12px; border-radius:8px; font-size:0.75rem; font-weight:800; background:#eee; color:#888; margin-bottom:10px;">접수 예정</div>
+                <h3 style="font-size:1.3rem; font-weight:900; margin:0 0 10px 0;">${race.title}</h3>
                 <div id="detail-${idx}" class="detail-info">
-                    <div class="info-item">📍 장소: ${race.location || '장소 미정'}</div>
-                    <div class="info-item">📅 일시: ${race.race_date}</div>
-                    <div class="info-item">🕒 집결: 07:00</div>
+                    <div>📍 장소: ${race.location || '미정'}</div><div>📅 일시: ${race.race_date}</div><div>🕒 집결: 07:00</div>
                 </div>
-                
                 <button class="more-btn" onclick="toggleDetail('detail-${idx}', this)">상세 일정 보기 ▾</button>
-            </div>
-        `).join('');
+            </div>`).join('');
     }
-
-    // [🛠️ 토글 버그 해결] 상태를 정확히 체크하여 열기/닫기 전환
     function toggleDetail(id, btn) {
-        const detail = document.getElementById(id);
-        const isOpening = detail.style.display === 'none' || detail.style.display === '';
-        
-        if (isOpening) {
-            detail.style.display = 'block';
-            btn.innerText = '상세 일정 닫기 ▴';
-        } else {
-            detail.style.display = 'none';
-            btn.innerText = '상세 일정 보기 ▾';
-        }
+        const d = document.getElementById(id);
+        const isO = d.style.display === 'none' || d.style.display === '';
+        d.style.display = isO ? 'block' : 'none';
+        btn.innerText = isO ? '상세 일정 닫기 ▴' : '상세 일정 보기 ▾';
     }
-
-    window.onload = loadSchedules;
+    function filterSchedules() {
+        const q = document.querySelector('.search-input').value.toLowerCase();
+        render(allData.filter(r => r.title.toLowerCase().includes(q) || (r.location && r.location.toLowerCase().includes(q))));
+    }
+    window.onload = load;
 </script>
 </body>
 </html>
