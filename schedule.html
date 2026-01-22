@@ -10,57 +10,55 @@
         :root { --main-color: #e91e63; --bg-color: #f0f2f5; --major-gold: #f1c40f; }
         body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; }
         .container { max-width: 800px; margin: 1rem auto; padding: 0 1rem; }
-        .page-header { background: white; border-radius: 20px; padding: 1rem 1.5rem; margin-bottom: 0.8rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-        .header-title { font-size: 1.4rem; font-weight: 900; margin-bottom: 4px; }
-        .search-input { width: 100%; padding: 10px 20px; border-radius: 15px; border: 2px solid white; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.04); font-size: 0.95rem; outline: none; margin-bottom: 1.2rem; }
-        .race-card { background: white; border-radius: 24px; padding: 1.8rem; margin-bottom: 1.5rem; position: relative; border: 2px solid transparent; box-shadow: 0 8px 20px rgba(0,0,0,0.04); }
+        .page-header { background: white; border-radius: 20px; padding: 1rem; margin-bottom: 0.8rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .header-title { font-size: 1.3rem; font-weight: 900; }
+        .search-input { width: 100%; padding: 10px 20px; border-radius: 15px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.04); font-size: 0.9rem; outline: none; margin-bottom: 1rem; box-sizing: border-box; }
+        .race-card { background: white; border-radius: 24px; padding: 1.5rem; margin-bottom: 1.2rem; position: relative; border: 2px solid transparent; box-shadow: 0 8px 20px rgba(0,0,0,0.04); }
         .race-card.is-major { border-color: var(--major-gold); background: #fffdf5; }
-        .major-badge { position: absolute; top: -12px; left: 24px; background: var(--major-gold); color: #333; font-size: 0.75rem; font-weight: 800; padding: 5px 14px; border-radius: 10px; }
-        .detail-info { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; font-size: 0.9rem; color: #666; }
-        .more-btn { width: 100%; padding: 12px; background: #f8f9fa; border: 1px solid #eee; border-radius: 12px; color: #888; font-size: 0.85rem; font-weight: bold; cursor: pointer; margin-top: 15px; }
+        .major-badge { position: absolute; top: -12px; left: 24px; background: var(--major-gold); color: #333; font-size: 0.7rem; font-weight: 800; padding: 4px 12px; border-radius: 10px; }
+        .detail-info { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee; font-size: 0.85rem; color: #666; }
+        .more-btn { width: 100%; padding: 10px; background: #f8f9fa; border: 1px solid #eee; border-radius: 12px; color: #888; font-size: 0.8rem; font-weight: bold; cursor: pointer; margin-top: 12px; }
     </style>
 </head>
 <body>
-<script src="navbar.js"></script>
-<div class="container">
-    <div class="page-header">
-        <div class="header-title">📅 2026 레이스 캘린더</div>
-        <p style="color:var(--main-color); font-weight:700; font-size:0.85rem;">전국의 주요 대회 일정을 관리자가 직접 검증하여 안내합니다.</p>
+    <script src="navbar.js"></script>
+    <div class="container">
+        <div class="page-header">
+            <div class="header-title">📅 2026 레이스 캘린더</div>
+            <p style="color:var(--main-color); font-weight:700; font-size:0.8rem; margin:5px 0;">전국의 대회 일정을 직접 검증하여 안내합니다.</p>
+        </div>
+        <input type="text" class="search-input" placeholder="대회명 검색..." onkeyup="filter()">
+        <div id="list"></div>
     </div>
-    <input type="text" class="search-input" placeholder="대회명 또는 지역으로 검색..." onkeyup="filterSchedules()">
-    <div id="schedule-list"></div>
-</div>
-<script>
-    const _supabase = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-    let allData = [];
-    async function load() {
-        const { data } = await _supabase.from('schedules').select('*').order('race_date', { ascending: true });
-        allData = data;
-        render(allData);
-    }
-    function render(data) {
-        document.getElementById('schedule-list').innerHTML = data.map((race, idx) => `
-            <div class="race-card ${race.is_major ? 'is-major' : ''}">
-                ${race.is_major ? '<div class="major-badge">RUNSTANDARD MAJOR</div>' : ''}
-                <div style="display:inline-block; padding:4px 12px; border-radius:8px; font-size:0.75rem; font-weight:800; background:#eee; color:#888; margin-bottom:10px;">접수 예정</div>
-                <h3 style="font-size:1.3rem; font-weight:900; margin:0 0 10px 0;">${race.title}</h3>
-                <div id="detail-${idx}" class="detail-info">
-                    <div>📍 장소: ${race.location || '미정'}</div><div>📅 일시: ${race.race_date}</div><div>🕒 집결: 07:00</div>
-                </div>
-                <button class="more-btn" onclick="toggleDetail('detail-${idx}', this)">상세 일정 보기 ▾</button>
-            </div>`).join('');
-    }
-    function toggleDetail(id, btn) {
-        const d = document.getElementById(id);
-        const isO = d.style.display === 'none' || d.style.display === '';
-        d.style.display = isO ? 'block' : 'none';
-        btn.innerText = isO ? '상세 일정 닫기 ▴' : '상세 일정 보기 ▾';
-    }
-    function filterSchedules() {
-        const q = document.querySelector('.search-input').value.toLowerCase();
-        render(allData.filter(r => r.title.toLowerCase().includes(q) || (r.location && r.location.toLowerCase().includes(q))));
-    }
-    window.onload = load;
-</script>
+    <script>
+        const _supabase = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+        let allData = [];
+        async function load() {
+            const { data } = await _supabase.from('schedules').select('*').order('race_date', { ascending: true });
+            allData = data;
+            render(allData);
+        }
+        function render(data) {
+            document.getElementById('list').innerHTML = data.map((race, idx) => `
+                <div class="race-card ${race.is_major ? 'is-major' : ''}">
+                    ${race.is_major ? '<div class="major-badge">RUNSTANDARD MAJOR</div>' : ''}
+                    <h3 style="font-size:1.1rem; font-weight:900; margin:0 0 5px 0;">${race.title}</h3>
+                    <div style="font-size:0.85rem; color:#888;">📅 ${race.race_date} | 📍 ${race.location || '미정'}</div>
+                    <div id="detail-${idx}" class="detail-info">대회 상세 요강이 준비 중입니다.</div>
+                    <button class="more-btn" onclick="toggleDetail('detail-${idx}', this)">상세 일정 보기 ▾</button>
+                </div>`).join('');
+        }
+        function toggleDetail(id, btn) {
+            const d = document.getElementById(id);
+            const isO = d.style.display === 'none' || d.style.display === '';
+            d.style.display = isO ? 'block' : 'none';
+            btn.innerText = isO ? '상세 일정 닫기 ▴' : '상세 일정 보기 ▾';
+        }
+        function filter() {
+            const q = document.querySelector('.search-input').value.toLowerCase();
+            render(allData.filter(r => r.title.toLowerCase().includes(q)));
+        }
+        window.onload = load;
+    </script>
 </body>
 </html>

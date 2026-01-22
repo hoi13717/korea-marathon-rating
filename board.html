@@ -10,53 +10,29 @@
         :root { --main-color: #e91e63; --bg-color: #f0f2f5; }
         body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; }
         .container { max-width: 800px; margin: 1rem auto; padding: 0 1rem; }
-        .page-header { background: white; border-radius: 20px; padding: 1rem 1.5rem; margin-bottom: 0.8rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-        .header-title { font-size: 1.4rem; font-weight: 900; margin-bottom: 4px; }
-        .notice-card { background: #fff5f7; border: 1px solid #ffd1dc; border-radius: 20px; padding: 1.2rem; margin-bottom: 1rem; }
-        .post-card { background: white; border-radius: 20px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
-        .write-btn { padding: 10px 25px; background: var(--main-color); color: white; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; }
-        #write-section { display: none; background: white; border-radius: 24px; padding: 2rem; margin-bottom: 1.5rem; }
-        .form-input, .form-textarea { width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 1.2rem; box-sizing: border-box; }
-        .form-textarea { height: 150px; resize: none; }
+        .page-header { background: white; border-radius: 20px; padding: 1rem; margin-bottom: 0.8rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .notice-card { background: #fff5f7; border: 1px solid #ffd1dc; border-radius: 20px; padding: 1rem; margin-bottom: 10px; }
+        .post-card { background: white; border-radius: 20px; padding: 1.2rem; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+        .write-btn { width: 100%; padding: 12px; background: var(--main-color); color: white; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; margin-bottom: 1rem; }
     </style>
 </head>
 <body>
-<script src="navbar.js"></script>
-<div class="container">
-    <div class="page-header">
-        <div class="header-title">💬 러너 광장</div>
-        <p style="color:var(--main-color); font-weight:700; font-size:0.85rem;">런스탠다드에서 자유롭게 달리기 이야기를 나누어 보세요.</p>
+    <script src="navbar.js"></script>
+    <div class="container">
+        <div class="page-header"><h2 style="font-size:1.3rem; margin:0;">💬 러너 광장</h2></div>
+        <button class="write-btn" onclick="location.href='#write'">✍️ 글쓰기</button>
+        <div id="notices"></div>
+        <div id="posts"></div>
     </div>
-    <div style="display:flex; gap:10px; margin-bottom:1rem;">
-        <input type="text" id="q" placeholder="검색..." style="flex:1; padding:10px 20px; border-radius:15px; border:none; box-shadow:0 4px 12px rgba(0,0,0,0.04);">
-        <button class="write-btn" onclick="toggleW(true)">글쓰기</button>
-    </div>
-    <div id="write-section">
-        <h3>글 작성하기</h3>
-        <input type="text" id="t" class="form-input" placeholder="제목">
-        <textarea id="c" class="form-textarea" placeholder="내용"></textarea>
-        <div style="display:flex; gap:10px;"><button style="flex:1; padding:15px; border-radius:15px; border:none;" onclick="toggleW(false)">취소</button><button style="flex:2; padding:15px; border-radius:15px; border:none; background:var(--main-color); color:white; font-weight:bold;" onclick="save()">등록</button></div>
-    </div>
-    <div id="notices"></div>
-    <div id="posts"></div>
-</div>
-<script>
-    const _supabase = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-    const NICKNAMES = ["풀코스완주자", "보급소털이범", "러닝은장비빨", "카본화성애자", "대회수집가", "아미노바이탈중독", "서브3꿈나무", "업힐요정"];
-    async function load() {
-        const { data: n } = await _supabase.from('notices').select('*').order('created_at', { ascending: false });
-        document.getElementById('notices').innerHTML = n.map(x => `<div class="notice-card"><span style="background:var(--main-color); color:white; padding:2px 8px; border-radius:6px; font-size:0.7rem; font-weight:900;">공지</span><div style="font-weight:900; margin:5px 0;">${x.title}</div><div style="font-size:0.8rem; color:#888;">👤 관리자</div></div>`).join('');
-        const { data: p } = await _supabase.from('posts').select('*').order('created_at', { ascending: false });
-        document.getElementById('posts').innerHTML = p.map(x => `<div class="post-card"><div style="font-size:1.15rem; font-weight:800; margin-bottom:8px;">${x.title}</div><div style="display:flex; justify-content:space-between; font-size:0.85rem; color:#999;"><span>👤 ${x.author_id}</span><span>📅 ${new Date(x.created_at).toLocaleDateString()}</span></div></div>`).join('');
-    }
-    function toggleW(s) { document.getElementById('write-section').style.display = s ? 'block' : 'none'; }
-    async function save() {
-        const t = document.getElementById('t').value; const c = document.getElementById('c').value;
-        const id = NICKNAMES[Math.floor(Math.random()*8)] + "_" + (Math.floor(Math.random()*89999)+10000);
-        const { error } = await _supabase.from('posts').insert([{ title: t, content: c, author_id: id }]);
-        if (error) alert(error.message); else location.reload();
-    }
-    window.onload = load;
-</script>
+    <script>
+        const _supabase = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+        async function load() {
+            const { data: n } = await _supabase.from('notices').select('*').order('created_at', { ascending: false });
+            document.getElementById('notices').innerHTML = n.map(x => `<div class="notice-card"><span style="background:var(--main-color); color:white; padding:2px 6px; border-radius:5px; font-size:0.65rem; font-weight:900;">공지</span><div style="font-weight:900; margin:5px 0; font-size:0.95rem;">${x.title}</div></div>`).join('');
+            const { data: p } = await _supabase.from('posts').select('*').order('created_at', { ascending: false });
+            document.getElementById('posts').innerHTML = p.map(x => `<div class="post-card"><div style="font-size:1rem; font-weight:800; margin-bottom:5px;">${x.title}</div><div style="font-size:0.75rem; color:#999;">👤 ${x.author_id} | 📅 ${new Date(x.created_at).toLocaleDateString()}</div></div>`).join('');
+        }
+        window.onload = load;
+    </script>
 </body>
 </html>

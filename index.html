@@ -3,169 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> 런스탠다드 | 마라톤 대회 평점 커뮤니티 </title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js"></script>
+    <title>런스탠다드 | 마라톤 평점 커뮤니티</title>
     <style>
-        :root { --main-color: #e91e63; --bg-color: #f8f9fa; --card-bg: #ffffff; --text-dark: #2c3e50; }
-        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; color: var(--text-dark); line-height: 1.7; }
-        
-        /* 네비게이션 바 (RunStandard 통일 구조) */
-        .nav-container { background: white; border-bottom: 1px solid #eee; display: flex; justify-content: center; padding: 12px 0; gap: 15px; position: sticky; top: 0; z-index: 100; }
-        .nav-item { text-decoration: none; color: #666; font-size: 0.95rem; font-weight: 600; padding: 10px 20px; border-radius: 25px; transition: 0.3s; }
-        .nav-item:hover { background: #ffebee; color: var(--main-color); }
-        .nav-item.active { background: var(--main-color); color: white; box-shadow: 0 4px 10px rgba(233, 30, 99, 0.2); }
-
-        /* [기] Hero 섹션: 브랜드 철학 및 카운트다운 */
-        .hero { background: white; padding: 5rem 1rem; text-align: center; border-bottom: 1px solid #eee; }
-        .hero h1 { font-size: 3rem; color: var(--main-color); margin-bottom: 1rem; letter-spacing: -1px; }
-        .philosophy { font-size: 1.2rem; color: #555; max-width: 750px; margin: 0 auto 2.5rem; font-weight: 300; }
-        .philosophy strong { color: var(--main-color); font-weight: 600; }
-        
-        .countdown-container { display: inline-block; background: #fff5f7; padding: 25px 50px; border-radius: 20px; border: 2px solid var(--main-color); }
-        .countdown-label { font-size: 0.95rem; color: #888; margin-bottom: 8px; }
-        .countdown-value { font-size: 2.5rem; font-weight: bold; color: var(--main-color); }
-
-        .container { max-width: 950px; margin: 4rem auto; padding: 0 1.5rem; }
-        h2 { font-size: 1.6rem; border-left: 6px solid var(--main-color); padding-left: 18px; margin-bottom: 2.5rem; color: #1a1a1a; }
-
-        /* [승] 데이터 기반 대회 평점 */
-        .rating-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-bottom: 6rem; }
-        .summary-card { background: var(--card-bg); padding: 2rem; border-radius: 24px; box-shadow: 0 12px 24px rgba(0,0,0,0.04); transition: 0.3s; border: 1px solid #f1f1f1; }
-        .summary-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(233, 30, 99, 0.08); }
-        .race-name { font-size: 0.9rem; color: #999; font-weight: bold; margin-bottom: 10px; }
-        .race-score { font-size: 3rem; font-weight: bold; color: var(--main-color); margin: 5px 0; }
-
-        /* [전] 지도 & 날씨 섹션 */
-        .visual-data-wrapper { display: grid; grid-template-columns: 1.8fr 1fr; gap: 25px; margin-bottom: 6rem; }
-        .map-box { background: #eaedf0; border-radius: 24px; display: flex; align-items: center; justify-content: center; min-height: 350px; color: #94a3b8; font-weight: 500; }
-        .weather-card { background: white; padding: 25px; border-radius: 24px; border: 1px solid #eee; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-
-        /* [결] 뉴스 리스트 */
-        .news-container { display: grid; gap: 18px; }
-        .news-card { background: white; padding: 18px 25px; border-radius: 16px; border: 1px solid #eee; text-decoration: none; color: inherit; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
-        .news-card:hover { border-color: var(--main-color); background: #fffafb; }
-
-        /* 푸터: 독립성 및 정보 공지 */
-        footer { background: #f1f3f5; padding: 5rem 1rem; text-align: center; color: #868e96; font-size: 0.9rem; margin-top: 6rem; }
-        .footer-brand { font-weight: 800; color: #495057; font-size: 1.2rem; margin-bottom: 15px; letter-spacing: -0.5px; }
-        .disclaimer-box { border-top: 1px solid #dee2e6; max-width: 700px; margin: 2.5rem auto 0; padding-top: 2.5rem; color: #adb5bd; line-height: 1.8; font-size: 0.85rem; }
+        :root { --main-color: #e91e63; --bg-color: #f0f2f5; }
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; padding-bottom: 50px; }
+        .container { max-width: 800px; margin: 1rem auto; padding: 0 1rem; }
+        .page-header { background: white; border-radius: 20px; padding: 1.2rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 1rem; }
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .dash-card { background: white; border-radius: 20px; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.04); text-align: center; }
+        .dash-card h3 { font-size: 0.85rem; color: #888; margin-bottom: 10px; }
+        .dash-value { font-size: 1.8rem; font-weight: 900; color: var(--main-color); }
+        .full-card { grid-column: span 2; text-align: left; }
     </style>
 </head>
 <body>
-
-<nav class="nav-container">
-    <a href="index.html" class="nav-item active">홈</a>
-    <a href="rating.html" class="nav-item">대회평점</a>
-    <a href="schedule.html" class="nav-item">대회일정</a>
-    <a href="#" class="nav-item">메뉴D</a>
-    <a href="#" class="nav-item">메뉴E</a>
-    <a href="#" class="nav-item">메뉴F</a>
-</nav>
-
-<section class="hero">
-    <h1>런스탠다드(RunStandard)</h1>
-    <p class="philosophy">
-        "우리의 공정한 평가가 대회 운영의 <strong>새로운 표준(Standard)</strong>을 세웁니다."<br>
-        투명한 데이터 공유를 통해 대한민국 러닝 문화의 질적 성장을 도모하는 독립 플랫폼입니다.
-    </p>
-    <div class="countdown-container">
-        <div class="countdown-label">2026 서울국제마라톤 D-Day</div>
-        <div class="countdown-value" id="main-timer">D-00</div>
-    </div>
-</section>
-
-<div class="container">
-    <h2>⭐ 표준 데이터: 최근 대회 평점 리포트</h2>
-    <div class="rating-grid" id="preview-list">
-        <div class="summary-card">평점 데이터를 불러오고 있습니다...</div>
-    </div>
-
-    <h2>📍 레이스 현황: 전국 대회 분포 및 기상</h2>
-    <div class="visual-data-wrapper">
-        <div class="map-box" id="race-map">
-            지도를 준비 중입니다 (Kakao/Google Map API 대기)
+    <script src="navbar.js"></script>
+    <div class="container">
+        <div class="page-header">
+            <h2 style="margin:0; font-size: 1.5rem;">🏃 RunStandard 관제 센터</h2>
+            <p style="color:#666; font-size:0.85rem; margin-top:5px;">반갑습니다, 호원M님! 오늘의 목표를 확인하세요.</p>
         </div>
-        <div class="weather-card">
-            <div style="font-size: 0.95rem; color: #adb5bd; margin-bottom: 15px; font-weight: 600;">SEOUL WEATHER</div>
-            <div id="weather-text" style="font-size: 1.3rem; font-weight: 800; color: var(--text-dark);">데이터 수신 중...</div>
-        </div>
-    </div>
-
-    <h2>📰 런스탠다드 인사이트: 최신 소식</h2>
-    <div class="news-container">
-        <a href="#" class="news-card">
-            <span style="font-weight: 600;">🏃‍♂️ [리포트] 2026 상반기 메이저 대회 운영 트렌드 분석</span>
-            <span style="font-size: 0.8rem; color: #adb5bd;">2026.01.15</span>
-        </a>
-        <a href="#" class="news-card">
-            <span style="font-weight: 600;">👟 [가이드] 공정한 레이스를 위한 러너의 에티켓 5가지</span>
-            <span style="font-size: 0.8rem; color: #adb5bd;">2026.01.14</span>
-        </a>
-    </div>
-</div>
-
-<footer>
-    <div class="footer-brand">RunStandard - Marathon Standard Project</div>
-    <p>© 2026 RunStandard. All rights reserved.</p>
-    <div class="disclaimer-box">
-        RunStandard는 특정 기업이나 단체로부터 어떠한 지원도 받지 않는 <strong>순수 개인 프로젝트</strong>입니다.<br>
-        본 사이트의 모든 데이터와 의견은 운영자의 개인적인 분석 결과이며, <strong>그 어떤 기관의 공식 입장과도 무관함</strong>을 밝힙니다.
-    </div>
-</footer>
-
-<script>
-    // config.js에서 설정된 공통 CONFIG 객체 사용
-    const _supabase = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-
-    // 1. 목표 대회 카운트다운 (2026-03-15 서울마라톤)
-    function runTimer() {
-        const goalDate = new Date('2026-03-15T09:00:00');
-        const now = new Date();
-        const gap = goalDate - now;
-        const d = Math.floor(gap / (1000 * 60 * 60 * 24));
-        document.getElementById('main-timer').innerText = d > 0 ? `D-${d}` : "RACE DAY";
-    }
-
-    // 2. Supabase에서 평점 요약 데이터 2개 추출
-    async function fetchPreviews() {
-        const { data, error } = await _supabase.from('reviews').select('*').limit(2);
-        const grid = document.getElementById('preview-list');
         
-        if (error || !data || data.length === 0) {
-            grid.innerHTML = '<p style="color:#adb5bd;">현재 축적된 표준 데이터가 없습니다.</p>';
-            return;
-        }
-
-        grid.innerHTML = data.map(item => `
-            <div class="summary-card">
-                <div class="race-name">${item.marathon_name}</div>
-                <div class="race-score">${item.rating_total}.0</div>
-                <div style="font-size:0.9rem; color:#868e96; min-height:3em;">"${item.comment ? item.comment.substring(0, 45) + '...' : '공정한 운영이 돋보이는 대회였습니다.'}"</div>
-                <div style="margin-top:20px; text-align:right;">
-                    <a href="rating.html" style="color:var(--main-color); font-size:0.85rem; text-decoration:none; font-weight:700;">전체 리포트 읽기 ></a>
-                </div>
+        <div class="dashboard-grid">
+            <div class="dash-card">
+                <h3>💍 Wedding D-Day</h3>
+                <div class="dash-value" id="wedding-dday">계산 중...</div>
             </div>
-        `).join('');
-    }
+            <div class="dash-card">
+                <h3>🏁 Marathon D-Day</h3>
+                <div class="dash-value" id="marathon-dday">계산 중...</div>
+            </div>
+            <div class="dash-card full-card">
+                <h3>📢 실시간 커뮤니티 소식</h3>
+                <p style="font-size:0.9rem; color:#444;">새로운 대회 리포트와 게시글이 준비 중입니다.</p>
+            </div>
+        </div>
+    </div>
 
-    // 3. 실시간 기상 데이터 수신
-    async function loadWeather() {
-        try {
-            const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Seoul&appid=${CONFIG.WEATHER_KEY}&units=metric&lang=kr`);
-            const weatherData = await response.json();
-            document.getElementById('weather-text').innerHTML = `🌡️ ${Math.round(weatherData.main.temp)}°C | ${weatherData.weather[0].description}`;
-        } catch (err) {
-            document.getElementById('weather-text').innerText = '데이터 일시 오류';
+    <script>
+        function getDday(targetDate) {
+            const now = new Date();
+            const target = new Date(targetDate);
+            const diff = target - now;
+            const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+            return days >= 0 ? `D-${days}` : `D+${Math.abs(days)}`;
         }
-    }
-
-    // 초기 실행
-    window.onload = () => {
-        runTimer();
-        fetchPreviews();
-        loadWeather();
-    };
-</script>
+        // 2026-02-07 결혼 / 2026-10-25 마라톤 목표 가정
+        document.getElementById('wedding-dday').innerText = getDday('2026-02-07');
+        document.getElementById('marathon-dday').innerText = getDday('2026-10-25');
+    </script>
 </body>
 </html>
