@@ -15,18 +15,19 @@
         .nav-item { text-decoration: none; color: #666; font-size: 0.95rem; font-weight: 600; padding: 10px 20px; border-radius: 25px; transition: 0.3s; }
         .nav-item.active { background: var(--main-color); color: white; box-shadow: 0 4px 10px rgba(233, 30, 99, 0.2); }
 
-        .container { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+        .container { max-width: 800px; margin: 1.5rem auto; padding: 0 1rem; }
         
-        /* 상단 멘트 섹션 (3번 옵션 적용) */
-        .page-header { background: white; border-radius: 24px; padding: 2.5rem 1.5rem; margin-bottom: 1.5rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-        .header-title { font-size: 1.8rem; font-weight: 900; color: #1a1a1a; margin-bottom: 12px; }
-        .header-subtitle { color: #e91e63; font-weight: 700; font-size: 1rem; line-height: 1.6; word-break: keep-all; }
+        /* 📏 소개 영역: 크기 절반 이하 축소 */
+        .page-header { background: white; border-radius: 20px; padding: 1rem 1.5rem; margin-bottom: 0.8rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .header-title { font-size: 1.4rem; font-weight: 900; color: #1a1a1a; margin-bottom: 4px; }
+        .header-subtitle { color: #e91e63; font-weight: 700; font-size: 0.85rem; line-height: 1.4; word-break: keep-all; }
 
-        /* 검색창 스타일 */
-        .search-container { margin-bottom: 2rem; }
-        #search-input { width: 100%; padding: 18px 25px; border-radius: 20px; border: 2px solid white; background: white; box-shadow: 0 8px 20px rgba(0,0,0,0.04); font-size: 1rem; font-weight: 600; box-sizing: border-box; outline: none; transition: 0.3s; }
+        /* 🔍 검색 영역: 크기 절반 이하 축소 */
+        .search-container { margin-bottom: 1.2rem; }
+        #search-input { width: 100%; padding: 10px 20px; border-radius: 15px; border: 2px solid white; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.04); font-size: 0.95rem; font-weight: 600; box-sizing: border-box; outline: none; transition: 0.3s; }
         #search-input:focus { border-color: var(--main-color); }
 
+        /* 레이스 카드 디자인 */
         .race-card { background: white; border-radius: 24px; padding: 1.8rem; margin-bottom: 1.5rem; box-shadow: 0 8px 20px rgba(0,0,0,0.04); position: relative; border: 2px solid transparent; }
         .race-card.is-major { border-color: var(--major-gold); background: #fffdf5; }
         .major-badge { position: absolute; top: -12px; left: 24px; background: var(--major-gold); color: #333; font-size: 0.75rem; font-weight: 800; padding: 5px 14px; border-radius: 10px; z-index: 1; }
@@ -35,7 +36,6 @@
         .star-display { color: var(--star-color); font-size: 1.4rem; letter-spacing: 2px; }
         .total-score-num { font-size: 2.2rem; font-weight: 900; color: var(--main-color); line-height: 1; }
         
-        /* 세부 지표 그리드 (기념품 워딩 반영) */
         .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(95px, 1fr)); gap: 8px; border-top: 1px solid #f1f3f5; padding-top: 18px; margin-bottom: 15px; }
         .detail-item { background: var(--bg-light); padding: 10px 4px; border-radius: 12px; text-align: center; font-size: 0.78rem; font-weight: 700; color: #555; }
 
@@ -71,7 +71,7 @@
 <div class="container">
     <div class="page-header">
         <div class="header-title">⭐ 레이스 리포트</div>
-        <div class="header-subtitle">"달려본 사람만이 알 수 있는 진짜 이야기.<br>런스탠다드에서 공정한 평가로 더 나은 마라톤 문화를 함께 만들어가요."</div>
+        <div class="header-subtitle">"달려본 사람만이 알 수 있는 진짜 이야기. 런스탠다드에서 공정한 평가로 더 나은 마라톤 문화를 함께 만들어가요."</div>
     </div>
 
     <div class="search-container">
@@ -83,7 +83,7 @@
 
 <script>
     const _supabase = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-    let allRaceData = []; // 검색 필터링을 위한 마스터 데이터 저장소
+    let allRaceData = []; 
 
     const NICKNAMES = ["풀코스완주자", "보급소털이범", "러닝은장비빨", "카본화성애자", "대회수집가", "아미노바이탈중독", "고글속의눈물", "페이스조절실패", "서브3꿈나무", "업힐요정"];
 
@@ -106,24 +106,13 @@
             const count = matchedReviews.length;
             const calcAvg = (k) => count > 0 ? (matchedReviews.reduce((s, r) => s + r[k], 0) / count).toFixed(1) : "0.0";
 
-            return { 
-                ...race, 
-                reviews: matchedReviews, 
-                count, 
-                avgTotal: calcAvg('rating_total'), 
-                avgCourse: calcAvg('rating_course'), 
-                avgOrg: calcAvg('rating_organize'), 
-                avgSupply: calcAvg('rating_supply'), 
-                avgGift: calcAvg('rating_souvenir'), 
-                avgCost: calcAvg('rating_cost') 
-            };
+            return { ...race, reviews: matchedReviews, count, avgTotal: calcAvg('rating_total'), avgCourse: calcAvg('rating_course'), avgOrg: calcAvg('rating_organize'), avgSupply: calcAvg('rating_supply'), avgGift: calcAvg('rating_souvenir'), avgCost: calcAvg('rating_cost') };
         });
 
         allRaceData.sort((a, b) => (b.is_major - a.is_major) || (new Date(b.race_date) - new Date(a.race_date)));
         render(allRaceData);
     }
 
-    // 🔍 실시간 검색 필터링 로직
     function filterRaces() {
         const query = document.getElementById('search-input').value.toLowerCase();
         const filtered = allRaceData.filter(race => 
@@ -185,7 +174,6 @@
         }).join('');
     }
 
-    // [🛠️ 버그 수정] 토글 시 텍스트 및 클래스(색상) 전환 로직 완벽 보완
     function toggleFeed(id, btn) {
         const feed = document.getElementById(id);
         const count = btn.innerText.match(/\d+/)[0]; 
