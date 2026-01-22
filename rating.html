@@ -15,9 +15,9 @@
         .nav-item { text-decoration: none; color: #666; font-size: 0.95rem; font-weight: 600; padding: 10px 20px; border-radius: 25px; transition: 0.3s; }
         .nav-item.active { background: var(--main-color); color: white; box-shadow: 0 4px 10px rgba(233, 30, 99, 0.2); }
 
-        .container { max-width: 800px; margin: 1.5rem auto; padding: 0 1rem; }
+        .container { max-width: 800px; margin: 1rem auto; padding: 0 1rem; }
         
-        /* 📏 소개 영역: 크기 절반 이하 축소 */
+        /* 📏 소개 영역: 크기 절반 이하 축소 및 3번 멘트 적용 */
         .page-header { background: white; border-radius: 20px; padding: 1rem 1.5rem; margin-bottom: 0.8rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
         .header-title { font-size: 1.4rem; font-weight: 900; color: #1a1a1a; margin-bottom: 4px; }
         .header-subtitle { color: #e91e63; font-weight: 700; font-size: 0.85rem; line-height: 1.4; word-break: keep-all; }
@@ -27,7 +27,7 @@
         #search-input { width: 100%; padding: 10px 20px; border-radius: 15px; border: 2px solid white; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.04); font-size: 0.95rem; font-weight: 600; box-sizing: border-box; outline: none; transition: 0.3s; }
         #search-input:focus { border-color: var(--main-color); }
 
-        /* 레이스 카드 디자인 */
+        /* 대회 카드 디자인 */
         .race-card { background: white; border-radius: 24px; padding: 1.8rem; margin-bottom: 1.5rem; box-shadow: 0 8px 20px rgba(0,0,0,0.04); position: relative; border: 2px solid transparent; }
         .race-card.is-major { border-color: var(--major-gold); background: #fffdf5; }
         .major-badge { position: absolute; top: -12px; left: 24px; background: var(--major-gold); color: #333; font-size: 0.75rem; font-weight: 800; padding: 5px 14px; border-radius: 10px; z-index: 1; }
@@ -36,12 +36,17 @@
         .star-display { color: var(--star-color); font-size: 1.4rem; letter-spacing: 2px; }
         .total-score-num { font-size: 2.2rem; font-weight: 900; color: var(--main-color); line-height: 1; }
         
+        /* 세부 지표 그리드 */
         .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(95px, 1fr)); gap: 8px; border-top: 1px solid #f1f3f5; padding-top: 18px; margin-bottom: 15px; }
         .detail-item { background: var(--bg-light); padding: 10px 4px; border-radius: 12px; text-align: center; font-size: 0.78rem; font-weight: 700; color: #555; }
 
-        /* 토글 버튼 */
+        /* 🔘 토글 버튼 디자인 (기획 반영) */
         .toggle-feed-btn { width: 100%; padding: 14px; border-radius: 14px; font-size: 0.9rem; font-weight: 800; cursor: pointer; transition: 0.3s; margin-top: 10px; border: none; }
+        
+        /* 닫혀있을 때: 강조색 (핑크) */
         .toggle-feed-btn.closed { background: var(--main-color); color: white; box-shadow: 0 4px 12px rgba(233, 30, 99, 0.2); }
+        
+        /* 열려있을 때: 비강조색 (회색) */
         .toggle-feed-btn.open { background: #f1f3f5; color: #adb5bd; border: 1px solid #eee; }
 
         .review-feed { margin-top: 15px; background: #fafafa; border-radius: 15px; padding: 15px; display: none; }
@@ -50,6 +55,7 @@
         .rev-comment { font-size: 0.9rem; color: #444; margin: 10px 0; white-space: pre-line; }
         .rev-detail-tag { font-size: 0.72rem; background: #f1f3f5; padding: 3px 10px; border-radius: 8px; color: #666; font-weight: 700; border: 1px solid #e9ecef; margin-right: 5px; }
 
+        /* 평점 별점 레이아웃 */
         .star-rating { display: flex; flex-direction: row-reverse; gap: 5px; }
         .star-rating input { display: none; }
         .star-rating label { font-size: 1.8rem; color: #ddd; cursor: pointer; transition: 0.2s; }
@@ -174,10 +180,13 @@
         }).join('');
     }
 
+    // [🛠️ 버그 수정] 토글 시 텍스트 및 클래스(색상) 전환 로직 완벽 보완
     function toggleFeed(id, btn) {
         const feed = document.getElementById(id);
-        const count = btn.innerText.match(/\d+/)[0]; 
+        const countMatch = btn.innerText.match(/\d+/);
+        const count = countMatch ? countMatch[0] : 0;
         
+        // feed.style.display 상태를 정확히 체크
         if (feed.style.display === 'none' || feed.style.display === '') {
             feed.style.display = 'block';
             btn.classList.remove('closed');
