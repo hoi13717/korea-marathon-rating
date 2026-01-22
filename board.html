@@ -11,28 +11,37 @@
         body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; padding-bottom: 50px; }
         .container { max-width: 800px; margin: 1rem auto; padding: 0 1rem; }
         
-        /* 컴팩트 헤더 디자인 */
         .page-header { background: white; border-radius: 20px; padding: 1rem; margin-bottom: 0.8rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
         .header-title { font-size: 1.3rem; font-weight: 900; margin-bottom: 4px; }
         
-        /* 버튼 및 검색창 */
         .write-btn { width: 100%; padding: 12px; background: var(--main-color); color: white; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; margin-bottom: 1rem; font-size: 1rem; }
-        .search-input { width: 100%; padding: 10px 20px; border-radius: 15px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.04); font-size: 0.9rem; outline: none; margin-bottom: 1rem; box-sizing: border-box; }
 
-        /* 글쓰기 섹션 */
+        /* ✍️ 수정된 글쓰기 섹션 (내용 삭제, 코멘트로 워딩 변경) */
         #write-section { display: none; background: white; border-radius: 24px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 8px 25px rgba(0,0,0,0.05); }
         .form-group { margin-bottom: 1rem; }
         .form-label { display: block; font-weight: 800; font-size: 0.85rem; margin-bottom: 6px; color: #555; }
-        .form-input, .form-textarea { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #eee; background: #fcfcfc; box-sizing: border-box; font-size: 0.95rem; }
-        .form-textarea { height: 180px; resize: none; }
+        .form-input { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #eee; background: #fcfcfc; box-sizing: border-box; font-size: 0.95rem; }
         .btn-group { display: flex; gap: 10px; margin-top: 10px; }
         .cancel-btn { flex: 1; padding: 12px; background: #eee; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
         .save-btn { flex: 2; padding: 12px; background: var(--main-color); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
 
-        /* 게시글 카드 디자인 */
-        .notice-card { background: #fff5f7; border: 1px solid #ffd1dc; border-radius: 20px; padding: 1rem; margin-bottom: 10px; }
-        .post-card { background: white; border-radius: 20px; padding: 1.2rem; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+        /* 게시글 카드 및 상호작용 레이아웃 */
+        .post-card { background: white; border-radius: 20px; padding: 1.5rem; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
         .post-category { display: inline-block; padding: 3px 10px; border-radius: 6px; background: #f1f3f5; color: #666; font-size: 0.7rem; font-weight: 800; margin-bottom: 6px; }
+        .post-comment { font-size: 1.1rem; font-weight: 800; margin-bottom: 8px; color: #222; }
+        
+        /* 👍👎 좋아요/싫어요 및 대댓글 버튼 */
+        .interaction-bar { display: flex; gap: 15px; margin-top: 12px; border-top: 1px solid #f8f9fa; padding-top: 10px; }
+        .inter-btn { background: none; border: none; font-size: 0.85rem; color: #888; cursor: pointer; display: flex; align-items: center; gap: 4px; font-weight: 600; }
+        .inter-btn:hover { color: var(--main-color); }
+
+        /* 💬 대댓글 영역 */
+        .reply-container { margin-top: 10px; background: #f9f9f9; border-radius: 12px; padding: 10px; font-size: 0.85rem; }
+        .reply-item { border-bottom: 1px solid #eee; padding: 8px 0; }
+        .reply-item:last-child { border-bottom: none; }
+        .reply-input-group { display: flex; gap: 8px; margin-top: 10px; }
+        .reply-input { flex: 1; padding: 8px 12px; border-radius: 8px; border: 1px solid #ddd; font-size: 0.8rem; }
+        .reply-save-btn { background: var(--main-color); color: white; border: none; border-radius: 8px; padding: 0 12px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -40,14 +49,13 @@
     <div class="container">
         <div class="page-header">
             <h2 class="header-title">💬 러너 광장</h2>
-            <p style="color:var(--main-color); font-weight:700; font-size:0.8rem; margin:0;">런스탠다드에서 자유롭게 달리기 이야기를 나누어 보세요.</p>
+            <p style="color:var(--main-color); font-weight:700; font-size:0.8rem; margin:0;">달리기 이야기를 자유롭게 나누고 반응해 보세요.</p>
         </div>
 
-        <button class="write-btn" id="main-write-btn" onclick="toggleWriteSection(true)">✍️ 글쓰기</button>
-        <input type="text" id="board-search" class="search-input" placeholder="관심 있는 키워드를 검색하세요..." onkeyup="filterPosts()">
+        <button class="write-btn" id="main-write-btn" onclick="toggleWriteSection(true)">✍️ 코멘트 남기기</button>
 
         <div id="write-section">
-            <h3 style="margin:0 0 15px 0; font-size: 1.1rem;">📝 새로운 글 작성</h3>
+            <h3 style="margin:0 0 15px 0; font-size: 1.1rem;">📝 새로운 코멘트 작성</h3>
             <div class="form-group">
                 <label class="form-label">카테고리</label>
                 <select id="p-category" class="form-input">
@@ -58,12 +66,8 @@
                 </select>
             </div>
             <div class="form-group">
-                <label class="form-label">제목</label>
-                <input type="text" id="p-title" class="form-input" placeholder="제목을 입력하세요.">
-            </div>
-            <div class="form-group">
-                <label class="form-label">내용</label>
-                <textarea id="p-content" class="form-textarea" placeholder="러너들과 나누고 싶은 이야기를 적어주세요."></textarea>
+                <label class="form-label">코멘트</label>
+                <input type="text" id="p-comment" class="form-input" placeholder="러너들과 나누고 싶은 이야기를 적어주세요.">
             </div>
             <div class="btn-group">
                 <button class="cancel-btn" onclick="toggleWriteSection(false)">취소</button>
@@ -77,95 +81,19 @@
 
     <script>
         const _supabase = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-        let allPosts = [];
-        
-        // [A] 고유 ID 생성 시스템
         const NICKNAMES = ["풀코스완주자", "보급소털이범", "러닝은장비빨", "카본화성애자", "대회수집가", "아미노바이탈중독", "서브3꿈나무", "업힐요정"];
+        
         function generateId() {
-            const nick = NICKNAMES[Math.floor(Math.random() * NICKNAMES.length)];
-            const num = Math.floor(Math.random() * 89999) + 10000;
-            return `${nick}_${num}`;
+            return NICKNAMES[Math.floor(Math.random() * NICKNAMES.length)] + "_" + (Math.floor(Math.random() * 89999) + 10000);
         }
 
         async function loadBoard() {
-            // 공지사항 로드
             const { data: n } = await _supabase.from('notices').select('*').order('created_at', { ascending: false });
-            document.getElementById('notices').innerHTML = (n || []).map(x => `
-                <div class="notice-card">
-                    <span style="background:var(--main-color); color:white; padding:2px 8px; border-radius:6px; font-size:0.65rem; font-weight:900;">공지</span>
-                    <div style="font-weight:900; margin:5px 0; font-size:0.95rem;">${x.title}</div>
-                    <div style="font-size:0.75rem; color:#888;">📅 ${new Date(x.created_at).toLocaleDateString()} | 👤 관리자</div>
-                </div>`).join('');
-
-            // 일반 게시글 로드
             const { data: p } = await _supabase.from('posts').select('*').order('created_at', { ascending: false });
-            allPosts = p || [];
-            renderPosts(allPosts);
+            const { data: r } = await _supabase.from('replies').select('*').order('created_at', { ascending: true });
+
+            renderNotices(n || []);
+            renderPosts(p || [], r || []);
         }
 
-        function renderPosts(data) {
-            const container = document.getElementById('posts');
-            if (data.length === 0) {
-                container.innerHTML = '<p style="text-align:center; padding:3rem; color:#adb5bd;">작성된 게시글이 없습니다.</p>';
-                return;
-            }
-            container.innerHTML = data.map(x => `
-                <div class="post-card">
-                    <span class="post-category">${x.category || '자유'}</span>
-                    <div style="font-size:1.1rem; font-weight:800; margin-bottom:8px; color:#222;">${x.title}</div>
-                    <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:#999;">
-                        <span>👤 ${x.author_id}</span>
-                        <span>📅 ${new Date(x.created_at).toLocaleDateString()}</span>
-                    </div>
-                </div>`).join('');
-        }
-
-        // 🔍 검색 필터링
-        function filterPosts() {
-            const q = document.getElementById('board-search').value.toLowerCase();
-            renderPosts(allPosts.filter(p => p.title.toLowerCase().includes(q) || (p.content && p.content.toLowerCase().includes(q))));
-        }
-
-        // ✍️ 글쓰기 섹션 토글 기능
-        function toggleWriteSection(show) {
-            const section = document.getElementById('write-section');
-            const btn = document.getElementById('main-write-btn');
-            const list = document.getElementById('posts');
-            const notices = document.getElementById('notices');
-
-            section.style.display = show ? 'block' : 'none';
-            btn.style.display = show ? 'none' : 'block';
-            list.style.display = show ? 'none' : 'block';
-            notices.style.display = show ? 'none' : 'block';
-            if (show) window.scrollTo(0, 0);
-        }
-
-        // 💾 게시글 저장 로직
-        async function savePost() {
-            const title = document.getElementById('p-title').value;
-            const content = document.getElementById('p-content').value;
-            const category = document.getElementById('p-category').value;
-
-            if (!title || !content) {
-                alert('제목과 내용을 모두 입력해주세요.');
-                return;
-            }
-
-            const authorId = generateId(); // 고유 ID 부여
-
-            const { error } = await _supabase.from('posts').insert([{
-                title, content, category, author_id: authorId
-            }]);
-
-            if (error) {
-                alert('등록 중 오류가 발생했습니다: ' + error.message);
-            } else {
-                alert(`성공적으로 등록되었습니다! (ID: ${authorId})`);
-                location.reload();
-            }
-        }
-
-        window.onload = loadBoard;
-    </script>
-</body>
-</html>
+        function renderNotices(data) {
