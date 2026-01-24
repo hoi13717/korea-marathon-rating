@@ -113,15 +113,19 @@
 
         function renderAll() {
             const q = document.getElementById('board-search').value.toLowerCase();
-            let filtered = allPosts;
+            let filtered = [...allPosts];
             if (q) filtered = filtered.filter(p => p.title.toLowerCase().includes(q));
             
-            // 🏆 1. 단일 BEST 댓글 로직: 추천수가 가장 많은 1개만 선정
+            // 🏆 1. 베스트 코멘트 상단 고정 로직 (등록순서 무시)
             const maxLikes = filtered.length > 0 ? Math.max(...filtered.map(p => p.likes || 0)) : 0;
             let bestId = null;
             if (maxLikes > 0) {
-                const bestPost = filtered.find(p => p.likes === maxLikes);
-                if (bestPost) bestId = bestPost.id;
+                const bestPostIndex = filtered.findIndex(p => p.likes === maxLikes);
+                if (bestPostIndex > -1) {
+                    const bestPost = filtered.splice(bestPostIndex, 1)[0];
+                    filtered.unshift(bestPost); // 최상단으로 강제 이동
+                    bestId = bestPost.id;
+                }
             }
 
             renderPosts(filtered, bestId);
@@ -130,7 +134,6 @@
         function renderPosts(posts, bestId) {
             document.getElementById('posts').innerHTML = posts.map(post => {
                 const isBest = post.id === bestId;
-                // 🚨 2. 블라인드 로직: 신고가 좋아요보다 많을 때
                 const isBlinded = (post.reports || 0) > (post.likes || 0);
                 const postReplies = allReplies.filter(re => re.post_id === post.id);
 
@@ -188,9 +191,46 @@
             }).join('');
         }
 
-        // [🛠️ 답글 수정 로직]
-        function startEditReply(id) {
+        // [🛠️ 2. 비밀번호 불일치 팝업 안내 로직 강화]
+        async function saveEditPost(id) {
+            const newT = document.getElementById(`edit-input-${id}`).value, pw = document.getElementById(`edit-area-${id}`).getAttribute('data-pw');
+            const { data, error } = await _supabase.from('posts').update({ title: newT }).eq('id', id).eq('password', pw).select();
+            if (error || (data && data.length === 0)) alert("비밀번호가 일치하지 않습니다."); 
+            else loadInitialData();
+        }
+
+        async function deletePost(id) {
+            const pw = prompt("암호 4자리를 입력하세요."); if (!pw) return;
+            const { data, error } = await _supabase.from('posts').delete().eq('id', id).eq('password', pw).select();
+            if (error || (data && data.length === 0)) alert("비밀번호가 일치하지 않습니다."); 
+            else loadInitialData();
+        }
+
+        async function saveEditReply(id) {
+            const newT = document.getElementById(`re-edit-input-${id}`).value, pw = document.getElementById(`re-edit-area-${id}`).getAttribute('data-pw');
+            const { data, error } = await _supabase.from('replies').update({ content: newT }).eq('id', id).eq('password', pw).select();
+            if (error || (data && data.length === 0)) alert("비밀번호가 일치하지 않습니다."); 
+            else loadInitialData();
+        }
+
+        async function deleteReply(id) {
             const pw = prompt("답글 암호를 입력하세요."); if (!pw) return;
+            const { data, error } = await _supabase.from('replies').delete().eq('id', id).eq('password', pw).select();
+            if (error || (data && data.length === 0)) alert("비밀번호가 일치하지 않습니다."); 
+            else loadInitialData();
+        }
+
+        function updateCharCount(el) { const len = el.value.length; document.getElementById('char-count').innerText = len; document.getElementById('progress-bar').style.width = len + '%'; }
+        async function savePost() {
+            const n = document.getElementById('p-name').value, p = document.getElementById('p-password').value, c = document.getElementById('p-comment').value;
+            if (!n || p.length !== 4 || !c) return alert('닉네임, 암호(4자리), 코멘트를 모두 확인해주세요.');
+            await _supabase.from('posts').insert([{ title: c, author_name: n, password: p, category: currentCategory === '전체' ? '자유수다' : currentCategory }]);
+            location.reload();
+        }
+        function startEditPost(id) { const pw = prompt("수정하려면 암호 4자리를 입력하세요."); if (!pw) return; document.getElementById(`text-${id}`).style.display = 'none'; document.getElementById(`edit-area-${id}`).style.display = 'block'; document.getElementById(`edit-area-${id}`).setAttribute('data-pw', pw); }
+        function cancelEditPost(id) { document.getElementById(`text-${id}`).style.display = 'block'; document.getElementById(`edit-area-${id}`).style.display = 'none'; }
+        function startEditReply(id) {
+            const pw = prompt("답글 수정 암호를 입력하세요."); if (!pw) return;
             document.getElementById(`re-text-${id}`).style.display = 'none';
             document.getElementById(`re-actions-${id}`).style.display = 'none';
             document.getElementById(`re-edit-area-${id}`).style.display = 'block';
@@ -201,35 +241,12 @@
             document.getElementById(`re-actions-${id}`).style.display = 'flex';
             document.getElementById(`re-edit-area-${id}`).style.display = 'none';
         }
-        async function saveEditReply(id) {
-            const newT = document.getElementById(`re-edit-input-${id}`).value, pw = document.getElementById(`re-edit-area-${id}`).getAttribute('data-pw');
-            const { data } = await _supabase.from('replies').update({ content: newT }).eq('id', id).eq('password', pw).select();
-            if (data && data.length > 0) loadInitialData(); else alert("비밀번호 오류");
-        }
-
-        // [공통 기능 로직]
-        function updateCharCount(el) { const len = el.value.length; document.getElementById('char-count').innerText = len; document.getElementById('progress-bar').style.width = len + '%'; }
-        async function savePost() {
-            const n = document.getElementById('p-name').value, p = document.getElementById('p-password').value, c = document.getElementById('p-comment').value;
-            if (!n || p.length !== 4 || !c) return alert('항목 확인');
-            await _supabase.from('posts').insert([{ title: c, author_name: n, password: p, category: currentCategory === '전체' ? '자유수다' : currentCategory }]);
-            location.reload();
-        }
-        function startEditPost(id) { const pw = prompt("암호 4자리"); if (!pw) return; document.getElementById(`text-${id}`).style.display = 'none'; document.getElementById(`edit-area-${id}`).style.display = 'block'; document.getElementById(`edit-area-${id}`).setAttribute('data-pw', pw); }
-        function cancelEditPost(id) { document.getElementById(`text-${id}`).style.display = 'block'; document.getElementById(`edit-area-${id}`).style.display = 'none'; }
-        async function saveEditPost(id) {
-            const newT = document.getElementById(`edit-input-${id}`).value, pw = document.getElementById(`edit-area-${id}`).getAttribute('data-pw');
-            const { data } = await _supabase.from('posts').update({ title: newT }).eq('id', id).eq('password', pw).select();
-            if (data && data.length > 0) loadInitialData(); else alert("비밀번호 오류");
-        }
-        async function deletePost(id) { const pw = prompt("암호"); const { data } = await _supabase.from('posts').delete().eq('id', id).eq('password', pw).select(); if (data && data.length > 0) loadInitialData(); }
         async function saveReply(postId) {
             const n = document.getElementById(`re-name-${postId}`).value, p = document.getElementById(`re-pw-${postId}`).value, c = document.getElementById(`re-input-${postId}`).value;
-            if (!n || p.length !== 4 || !c) return alert('항목 확인');
+            if (!n || p.length !== 4 || !c) return alert('답글 항목을 채워주세요.');
             await _supabase.from('replies').insert([{ post_id: postId, content: c, author_name: n, password: p }]);
             loadInitialData();
         }
-        async function deleteReply(id) { const pw = prompt("암호"); await _supabase.from('replies').delete().eq('id', id).eq('password', pw); loadInitialData(); }
         async function updateReaction(id, type, val) { await _supabase.from('posts').update({ [type]: val + 1 }).eq('id', id); loadInitialData(); }
         async function reportPost(id, val) { await _supabase.from('posts').update({ reports: val + 1 }).eq('id', id); loadInitialData(); }
         function filterCategory(cat, el) { currentCategory = cat; document.querySelectorAll('.chip').forEach(c => c.classList.remove('active')); el.classList.add('active'); loadInitialData(); }
