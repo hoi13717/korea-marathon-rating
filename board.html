@@ -6,20 +6,17 @@
     <title>런스탠다드 | 마라톤 평점 커뮤니티</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --main-color: #e91e63; --bg-color: #f0f2f5; --bg-light: #f8f9fa; }
+        :root { --main-color: #e91e63; --bg-color: #f0f2f5; }
         body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; padding-bottom: 50px; }
         .container { max-width: 800px; margin: 1rem auto; padding: 0 1rem; }
         
-        /* 📏 컴팩트 헤더 디자인 */
-        .page-header { background: white; border-radius: 20px; padding: 1rem 1.5rem; margin-bottom: 0.8rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-        .header-title { font-size: 1.4rem; font-weight: 900; color: #1a1a1a; margin-bottom: 4px; }
+        .page-header { background: white; border-radius: 20px; padding: 1rem; margin-bottom: 0.8rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .header-title { font-size: 1.3rem; font-weight: 900; margin-bottom: 4px; }
         
-        /* ✍️ 글쓰기 버튼 (코멘트 남기기) */
-        .write-btn { width: 100%; padding: 14px; background: var(--main-color); color: white; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; margin-bottom: 1rem; font-size: 1rem; box-shadow: 0 4px 12px rgba(233, 30, 99, 0.2); transition: 0.3s; }
-        .write-btn:hover { transform: translateY(-2px); opacity: 0.9; }
+        .write-btn { width: 100%; padding: 12px; background: var(--main-color); color: white; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; margin-bottom: 1rem; font-size: 1rem; box-shadow: 0 4px 12px rgba(233, 30, 99, 0.2); }
 
-        /* 📝 글쓰기 섹션 (코멘트로 통합) */
         #write-section { display: none; background: white; border-radius: 24px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 8px 25px rgba(0,0,0,0.05); }
         .form-group { margin-bottom: 1rem; }
         .form-label { display: block; font-weight: 800; font-size: 0.85rem; margin-bottom: 8px; color: #555; }
@@ -28,27 +25,26 @@
         .cancel-btn { flex: 1; padding: 15px; background: #eee; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; }
         .save-btn { flex: 2; padding: 15px; background: var(--main-color); color: white; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; }
 
-        /* 📋 게시글 카드 및 상호작용 */
         .post-card { background: white; border-radius: 20px; padding: 1.5rem; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
         .post-category { display: inline-block; padding: 3px 10px; border-radius: 6px; background: #fff0f5; color: var(--main-color); font-size: 0.72rem; font-weight: 800; margin-bottom: 10px; }
         .post-comment { font-size: 1.15rem; font-weight: 800; margin-bottom: 10px; color: #222; line-height: 1.4; }
         .post-meta { font-size: 0.82rem; color: #999; margin-bottom: 15px; }
 
-        /* 👍👎 상호작용 바 */
-        .interaction-bar { display: flex; gap: 15px; border-top: 1px solid #f8f9fa; padding-top: 12px; }
-        .inter-btn { background: none; border: none; font-size: 0.85rem; color: #888; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600; transition: 0.2s; }
+        .interaction-bar { display: flex; gap: 18px; border-top: 1px solid #f8f9fa; padding-top: 15px; }
+        /* 💅 아이콘 버튼 스타일 개선 */
+        .inter-btn { background: none; border: none; font-size: 0.9rem; color: #888; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; transition: 0.2s; padding: 0; }
+        .inter-btn i { font-size: 1.1rem; } /* 아이콘 크기 조절 */
         .inter-btn:hover { color: var(--main-color); }
+        .inter-btn:hover i { transform: scale(1.1); transition: 0.2s; }
 
-        /* 💬 대댓글 영역 */
-        .reply-container { margin-top: 12px; background: #f9f9f9; border-radius: 15px; padding: 12px; display: none; }
-        .reply-item { border-bottom: 1px solid #eee; padding: 10px 0; font-size: 0.88rem; }
+        .reply-container { margin-top: 15px; background: #f9f9f9; border-radius: 15px; padding: 15px; display: none; }
+        .reply-item { border-bottom: 1px solid #eee; padding: 10px 0; font-size: 0.9rem; }
         .reply-item:last-child { border-bottom: none; }
-        .reply-author { font-weight: 800; color: var(--main-color); margin-right: 5px; }
-        .reply-input-group { display: flex; gap: 8px; margin-top: 12px; }
-        .reply-input { flex: 1; padding: 10px 15px; border-radius: 10px; border: 1px solid #ddd; font-size: 0.85rem; }
-        .reply-save-btn { background: var(--main-color); color: white; border: none; border-radius: 10px; padding: 0 15px; cursor: pointer; font-weight: bold; }
+        .reply-author { font-weight: 800; color: var(--main-color); margin-right: 6px; }
+        .reply-input-group { display: flex; gap: 10px; margin-top: 15px; }
+        .reply-input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 0.9rem; }
+        .reply-save-btn { background: var(--main-color); color: white; border: none; border-radius: 12px; padding: 0 18px; cursor: pointer; font-weight: bold; }
 
-        /* 공지사항 */
         .notice-card { background: #fff5f7; border: 1px solid #ffd1dc; border-radius: 20px; padding: 1.2rem; margin-bottom: 12px; }
     </style>
 </head>
@@ -99,7 +95,6 @@
             const { data: n } = await _supabase.from('notices').select('*').order('created_at', { ascending: false });
             const { data: p } = await _supabase.from('posts').select('*').order('created_at', { ascending: false });
             const { data: r } = await _supabase.from('replies').select('*').order('created_at', { ascending: true });
-
             renderNotices(n || []);
             renderPosts(p || [], r || []);
         }
@@ -120,6 +115,7 @@
             }
             container.innerHTML = posts.map(post => {
                 const postReplies = allReplies.filter(re => re.post_id === post.id);
+                // 💅 이모지 대신 Font Awesome 아이콘 태그 적용
                 return `
                 <div class="post-card">
                     <span class="post-category">${post.category || '자유'}</span>
@@ -127,18 +123,20 @@
                     <div class="post-meta">👤 ${post.author_id} | 📅 ${new Date(post.created_at).toLocaleDateString()}</div>
                     
                     <div class="interaction-bar">
-                        <button class="inter-btn" onclick="updateReaction('${post.id}', 'likes', ${post.likes || 0})">👍 ${post.likes || 0}</button>
-                        <button class="inter-btn" onclick="updateReaction('${post.id}', 'dislikes', ${post.dislikes || 0})">👎 ${post.dislikes || 0}</button>
-                        <button class="inter-btn" onclick="toggleReplyArea('${post.id}')">💬 답글 ${postReplies.length}</button>
+                        <button class="inter-btn" onclick="updateReaction('${post.id}', 'likes', ${post.likes || 0})">
+                            <i class="fa-regular fa-thumbs-up"></i> ${post.likes || 0}
+                        </button>
+                        <button class="inter-btn" onclick="updateReaction('${post.id}', 'dislikes', ${post.dislikes || 0})">
+                            <i class="fa-regular fa-thumbs-down"></i> ${post.dislikes || 0}
+                        </button>
+                        <button class="inter-btn" onclick="toggleReplyArea('${post.id}')">
+                            <i class="fa-regular fa-comment-dots"></i> 답글 ${postReplies.length}
+                        </button>
                     </div>
 
                     <div id="reply-area-${post.id}" class="reply-container" style="display: ${postReplies.length > 0 ? 'block' : 'none'};">
                         <div id="reply-list-${post.id}">
-                            ${postReplies.map(re => `
-                                <div class="reply-item">
-                                    <span class="reply-author">${re.author_id}</span> ${re.content}
-                                </div>
-                            `).join('')}
+                            ${postReplies.map(re => `<div class="reply-item"><span class="reply-author">${re.author_id}</span> ${re.content}</div>`).join('')}
                         </div>
                         <div class="reply-input-group">
                             <input type="text" id="re-input-${post.id}" class="reply-input" placeholder="답글을 입력하세요...">
@@ -149,11 +147,17 @@
             }).join('');
         }
 
+        // 🛠️ DB 권한 설정 후 이 함수가 정상 작동할 것입니다.
         async function updateReaction(id, type, currentVal) {
             const updateData = {};
             updateData[type] = currentVal + 1;
-            await _supabase.from('posts').update(updateData).eq('id', id);
-            loadBoard();
+            const { error } = await _supabase.from('posts').update(updateData).eq('id', id);
+            if (error) {
+                console.error("업데이트 실패:", error);
+                alert("오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+            } else {
+                loadBoard(); // 성공 시 목록 새로고침
+            }
         }
 
         function toggleReplyArea(id) {
@@ -168,7 +172,6 @@
             if (!error) loadBoard();
         }
 
-        // [🛠️ 핵심] 버튼 작동 버그 해결을 위한 토글 로직
         function toggleWriteSection(show) {
             document.getElementById('write-section').style.display = show ? 'block' : 'none';
             document.getElementById('main-write-btn').style.display = show ? 'none' : 'block';
