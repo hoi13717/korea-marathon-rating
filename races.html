@@ -13,83 +13,162 @@
         body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; padding-bottom: 50px; }
         .container { max-width: 800px; margin: 0 auto; padding: 20px 1rem; }
         
-        /* 🎬 씨네21 스타일 포스터 그리드 */
-        .race-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 25px; margin-top: 20px; }
-        .race-card { cursor: pointer; transition: 0.3s; }
-        .race-card:hover { transform: translateY(-8px); }
-        .poster-wrapper { width: 100%; aspect-ratio: 2 / 3; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); background: #eee; }
-        .poster-img { width: 100%; height: 100%; object-fit: cover; }
-        .race-info { margin-top: 12px; padding: 0 4px; }
-        .race-title { font-size: 1rem; font-weight: 800; color: #222; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .rating-box { display: flex; align-items: center; gap: 4px; font-size: 0.9rem; font-weight: 900; color: var(--main-color); }
+        /* 🎬 씨네21 스타일 포스터 그리드 레이아웃 */
+        .race-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .race-card {
+            background: none;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .race-card:hover {
+            transform: translateY(-10px);
+        }
+
+        /* 포스터 이미지 비율 고정 (2:3) */
+        .poster-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 2 / 3;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            background: #e2e2e2; /* 로딩 전 배경색 */
+        }
+
+        .poster-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: 0.3s;
+        }
+
+        /* 대회 정보 텍스트 */
+        .race-info {
+            margin-top: 12px;
+            padding: 0 4px;
+        }
+
+        .race-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #222;
+            margin-bottom: 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* 별점 표시 (유저 평점 평균) */
+        .rating-box {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.95rem;
+            font-weight: 900;
+            color: var(--main-color);
+        }
+
+        .rating-star {
+            font-size: 0.8rem;
+        }
+
+        .race-date-text {
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-top: 4px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2 style="font-weight: 900; letter-spacing: -1px; margin-top: 20px;">📅 대회 일정</h2>
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:20px;">
+            <h2 style="font-weight: 900; letter-spacing: -1.5px; margin:0;">📅 대회 일정</h2>
+            <span style="font-size:0.8rem; color:#999; font-weight:700;">최신순 · 러너 평점</span>
+        </div>
+
         <div id="race-list" class="race-grid">
-            <div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #ccc;">대회 정보를 불러오는 중입니다...</div>
+            <div style="grid-column: 1/-1; text-align: center; padding: 100px 0; color: #ccc;">
+                <i class="fa-solid fa-spinner fa-spin fa-2x"></i><br><br>
+                대회 데이터를 불러오는 중입니다...
+            </div>
         </div>
     </div>
 
     <script>
         const _supabase = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
-        async function fetchSchedules() {
+        async function initRaces() {
             try {
-                // 1. 기존 'schedules' 테이블에서 데이터 조회
-                const { data: list, error } = await _supabase
+                // 1. 기존 'schedules' 테이블 데이터 호출
+                // race_date가 없을 경우 에러 방지를 위해 created_at으로 정렬 시도
+                const { data: list, error: fetchError } = await _supabase
                     .from('schedules')
                     .select('*')
-                    .order('race_date', { ascending: true });
+                    .order('created_at', { ascending: false });
 
-                if (error) throw error;
+                if (fetchError) throw fetchError;
 
-                // 2. 평점 데이터 집계 (기존 user_reviews 활용)
+                // 2. 유저 별점 데이터 호출
                 const { data: reviews } = await _supabase.from('user_reviews').select('*');
 
-                renderSchedules(list, reviews || []);
+                renderRaces(list, reviews || []);
             } catch (err) {
-                console.error('데이터 로드 실패:', err);
-                document.getElementById('race-list').innerHTML = `<p style="text-align:center;">데이터를 불러오지 못했습니다.</p>`;
+                console.error('Fetch Error:', err);
+                document.getElementById('race-list').innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #888;">
+                        <i class="fa-solid fa-triangle-exclamation fa-2x"></i><br><br>
+                        데이터를 불러오지 못했습니다.<br>
+                        <small style="color:#ccc;">${err.message}</small>
+                    </div>`;
             }
         }
 
-        function renderSchedules(items, reviews) {
+        function renderRaces(items, reviews) {
             const listEl = document.getElementById('race-list');
+            
             if (items.length === 0) {
-                listEl.innerHTML = `<p style="grid-column:1/-1; text-align:center;">등록된 대회 일정이 없습니다.</p>`;
+                listEl.innerHTML = `<p style="grid-column:1/-1; text-align:center; padding:100px 0; color:#ccc;">표시할 대회가 없습니다.</p>`;
                 return;
             }
 
             listEl.innerHTML = items.map(race => {
-                // 📊 해당 대회(schedules.id)에 연결된 리뷰 평균 계산
+                // 📊 해당 대회에 기록된 5개 지표의 전체 평균 계산 (10점 만점)
                 const raceReviews = reviews.filter(rev => rev.race_id === race.id);
-                let avgScore = "0.0";
+                let displayScore = "0.0";
 
                 if (raceReviews.length > 0) {
-                    const totalSum = raceReviews.reduce((acc, cur) => 
+                    const sum = raceReviews.reduce((acc, cur) => 
                         acc + (cur.course + cur.management + cur.supplies + cur.souvenirs + cur.cost_effective), 0);
-                    avgScore = (totalSum / (raceReviews.length * 5)).toFixed(1);
+                    // 5개 지표 평균을 10점 만점 기준으로 환산
+                    displayScore = (sum / (raceReviews.length * 5)).toFixed(1);
                 }
 
                 return `
                 <div class="race-card" onclick="location.href='race_detail.html?id=${race.id}'">
                     <div class="poster-wrapper">
-                        <img src="${race.poster_url || 'https://via.placeholder.com/200x300?text=No+Poster'}" class="poster-img" alt="${race.title}">
+                        <img src="${race.poster_url || 'https://via.placeholder.com/200x300?text=RunStandard'}" class="poster-img" alt="${race.title}">
                     </div>
                     <div class="race-info">
                         <div class="race-title">${race.title}</div>
                         <div class="rating-box">
-                            <i class="fa-solid fa-star"></i>
-                            <span>${avgScore}</span>
+                            <i class="fa-solid fa-star rating-star"></i>
+                            <span>${displayScore}</span>
                         </div>
+                        <div class="race-date-text">개봉(예정) : ${race.race_date || '일정 확인 중'}</div>
                     </div>
                 </div>`;
             }).join('');
         }
 
-        window.onload = fetchSchedules;
+        // 페이지 로드 시 실행
+        window.onload = initRaces;
     </script>
 </body>
 </html>
