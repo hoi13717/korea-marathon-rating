@@ -11,15 +11,13 @@
         :root { --main-color: #e91e63; --bg-color: #f0f2f5; }
         body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; padding-bottom: 50px; }
         .container { max-width: 800px; margin: 1rem auto; padding: 0 1rem; }
-        
         .page-header { background: white; border-radius: 20px; padding: 1rem; margin-bottom: 0.8rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-        .header-title { font-size: 1.3rem; font-weight: 900; margin-bottom: 4px; }
-        
+        .header-title { font-size: 1.3rem; font-weight: 900; }
         .search-container { margin-bottom: 1rem; display: flex; gap: 10px; }
         #board-search { flex: 1; padding: 12px 20px; border-radius: 15px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.04); font-size: 0.95rem; outline: none; }
         .write-btn-small { padding: 0 20px; background: var(--main-color); color: white; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; }
 
-        /* ✍️ 글쓰기 섹션 (4자리 비밀번호 입력 제한 적용) */
+        /* 글쓰기 섹션 */
         #write-section { display: none; background: white; border-radius: 24px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 8px 25px rgba(0,0,0,0.05); }
         .form-row { display: flex; gap: 10px; margin-bottom: 10px; }
         .form-input { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #eee; background: #fcfcfc; box-sizing: border-box; font-size: 0.95rem; }
@@ -27,30 +25,20 @@
 
         .post-card { background: white; border-radius: 20px; padding: 1.5rem; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
         .post-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-        .post-actions { display: flex; gap: 10px; font-size: 0.75rem; color: #bbb; font-weight: 600; }
-        .post-actions span { cursor: pointer; transition: 0.2s; }
-        .post-actions span:hover { color: var(--main-color); }
+        .post-comment { font-size: 1.15rem; font-weight: 800; color: #222; }
+        .post-actions { display: flex; gap: 10px; font-size: 0.75rem; color: #bbb; }
 
-        .post-comment { font-size: 1.15rem; font-weight: 800; color: #222; line-height: 1.4; }
         .interaction-bar { display: flex; gap: 18px; border-top: 1px solid #f8f9fa; padding-top: 15px; margin-top: 15px; }
         .inter-btn { background: none; border: none; font-size: 0.85rem; color: #888; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600; }
-        .inter-btn:hover { color: var(--main-color); }
 
         .reply-container { margin-top: 15px; background: #f9f9f9; border-radius: 15px; padding: 15px; display: none; }
-        .reply-item { border-bottom: 1px solid #eee; padding: 10px 0; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; }
-        .reply-input-group { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 8px; }
-        .reply-mini-input { padding: 8px; border-radius: 8px; border: 1px solid #ddd; font-size: 0.8rem; }
-
-        .notice-card { background: #fff5f7; border: 1px solid #ffd1dc; border-radius: 20px; padding: 1.2rem; margin-bottom: 12px; }
+        .reply-item { border-bottom: 1px solid #eee; padding: 8px 0; font-size: 0.85rem; display: flex; justify-content: space-between; }
     </style>
 </head>
 <body>
     <script src="navbar.js"></script>
     <div class="container">
-        <div class="page-header">
-            <h2 class="header-title">💬 러너 광장</h2>
-            <p style="color:var(--main-color); font-weight:700; font-size:0.85rem; margin:0;">달리기 이야기를 자유롭게 나누고 반응해 보세요.</p>
-        </div>
+        <div class="page-header"><h2 class="header-title">💬 러너 광장</h2></div>
 
         <div class="search-container">
             <input type="text" id="board-search" placeholder="코멘트 검색..." onkeyup="filterPosts()">
@@ -64,16 +52,15 @@
             </div>
             <div class="form-group">
                 <select id="p-category" class="form-input" style="margin-bottom:10px;">
-                    <option value="자유">자유수다</option><option value="훈련">훈련방법</option>
-                    <option value="장비">러닝장비</option><option value="대회">대회후기</option>
+                    <option value="자유수다">자유수다</option><option value="훈련방법">훈련방법</option>
+                    <option value="러닝장비">러닝장비</option><option value="대회후기">대회후기</option>
                 </select>
-                <input type="text" id="p-comment" class="form-input" placeholder="러너들과 나누고 싶은 코멘트를 입력하세요.">
+                <input type="text" id="p-comment" class="form-input" placeholder="코멘트를 입력하세요.">
             </div>
             <button class="save-btn" onclick="savePost()">등록하기</button>
             <button onclick="toggleWriteSection(false)" style="width:100%; background:none; border:none; color:#aaa; margin-top:10px; cursor:pointer;">취소</button>
         </div>
 
-        <div id="notices"></div>
         <div id="posts"></div>
     </div>
 
@@ -82,20 +69,10 @@
         let allPosts = [], allReplies = [];
 
         async function loadBoard() {
-            const { data: n } = await _supabase.from('notices').select('*').order('created_at', { ascending: false });
             const { data: p } = await _supabase.from('posts').select('*').order('created_at', { ascending: false });
             const { data: r } = await _supabase.from('replies').select('*').order('created_at', { ascending: true });
             allPosts = p || []; allReplies = r || [];
-            renderNotices(n || []);
             renderPosts(allPosts, allReplies);
-        }
-
-        function renderNotices(data) {
-            document.getElementById('notices').innerHTML = data.map(x => `
-                <div class="notice-card">
-                    <span style="background:var(--main-color); color:white; padding:2px 8px; border-radius:6px; font-size:0.65rem; font-weight:900;">공지</span>
-                    <div style="font-weight:900; margin:5px 0; font-size:1rem;">${x.title}</div>
-                </div>`).join('');
         }
 
         function renderPosts(posts, replies) {
@@ -106,87 +83,46 @@
                     <div class="post-header">
                         <span style="color:var(--main-color); font-size:0.75rem; font-weight:800;">${post.category}</span>
                         <div class="post-actions">
-                            <span onclick="editPost('${post.id}')"><i class="fa-solid fa-pen"></i> 수정</span>
-                            <span onclick="deletePost('${post.id}')"><i class="fa-solid fa-trash"></i> 삭제</span>
+                            <span onclick="editPost('${post.id}')" style="cursor:pointer">수정</span>
+                            <span onclick="deletePost('${post.id}')" style="cursor:pointer; margin-left:10px;">삭제</span>
                         </div>
                     </div>
                     <div class="post-comment">${post.title}</div>
-                    <div style="font-size:0.75rem; color:#999; margin-top:8px;">👤 ${post.author_name} | 📅 ${new Date(post.created_at).toLocaleDateString()}</div>
-                    
+                    <div style="font-size:0.75rem; color:#999; margin-top:5px;">👤 ${post.author_name} | 📅 ${new Date(post.created_at).toLocaleDateString()}</div>
                     <div class="interaction-bar">
                         <button class="inter-btn" onclick="updateReaction('${post.id}', 'likes', ${post.likes || 0})"><i class="fa-regular fa-thumbs-up"></i> ${post.likes || 0}</button>
                         <button class="inter-btn" onclick="toggleReplyArea('${post.id}')"><i class="fa-regular fa-comment-dots"></i> 답글 ${postReplies.length}</button>
                     </div>
-
-                    <div id="reply-area-${post.id}" class="reply-container" style="display: ${postReplies.length > 0 ? 'block' : 'none'};">
-                        <div id="reply-list-${post.id}">
-                            ${postReplies.map(re => `
-                                <div class="reply-item">
-                                    <div><strong style="color:var(--main-color)">${re.author_name}</strong>: ${re.content}</div>
-                                    <div class="post-actions"><span onclick="deleteReply('${re.id}')">삭제</span></div>
-                                </div>`).join('')}
-                        </div>
-                        <div class="reply-input-group">
-                            <input type="text" id="re-name-${post.id}" class="reply-mini-input" style="width:70px;" placeholder="작성자">
-                            <input type="password" id="re-pw-${post.id}" class="reply-mini-input" style="width:60px;" placeholder="암호4자리" maxlength="4">
-                            <input type="text" id="re-input-${post.id}" class="reply-mini-input" style="flex:1;" placeholder="답글 입력...">
-                            <button onclick="saveReply('${post.id}')" style="background:var(--main-color); color:white; border:none; border-radius:8px; padding:8px 15px; font-weight:bold; cursor:pointer;">등록</button>
-                        </div>
+                    <div id="reply-area-${post.id}" class="reply-container">
+                        ${postReplies.map(re => `<div class="reply-item"><div><strong style="color:var(--main-color)">${re.author_name}</strong>: ${re.content}</div></div>`).join('')}
                     </div>
                 </div>`;
             }).join('');
-        }
-
-        // [🛠️ 삭제 로직] 비밀번호 4자리 검증 필수
-        async function deletePost(id) {
-            const pw = prompt("삭제를 위해 비밀번호 4자리를 입력하세요.");
-            if (!pw || pw.length !== 4) return alert("정확한 비밀번호 4자리를 입력해야 합니다.");
-            const { data, error } = await _supabase.from('posts').delete().eq('id', id).eq('password', pw).select();
-            if (error || data.length === 0) alert("비밀번호가 일치하지 않습니다.");
-            else loadBoard();
-        }
-
-        async function editPost(id) {
-            const pw = prompt("수정을 위해 비밀번호 4자리를 입력하세요.");
-            if (!pw || pw.length !== 4) return alert("정확한 비밀번호 4자리를 입력해야 합니다.");
-            const newComment = prompt("수정할 코멘트 내용을 입력하세요.");
-            if (!newComment) return;
-            const { data, error } = await _supabase.from('posts').update({ title: newComment }).eq('id', id).eq('password', pw).select();
-            if (error || data.length === 0) alert("비밀번호가 일치하지 않습니다.");
-            else loadBoard();
         }
 
         async function savePost() {
             const name = document.getElementById('p-name').value;
             const pw = document.getElementById('p-password').value;
             const comment = document.getElementById('p-comment').value;
+            const category = document.getElementById('p-category').value;
 
             if (!name || !pw || !comment) return alert('모든 항목을 입력해주세요.');
-            if (pw.length !== 4) return alert('비밀번호는 반드시 4자리여야 합니다.');
+            if (pw.length !== 4) return alert('비밀번호 4자리를 정확히 입력해주세요.');
 
-            const { error } = await _supabase.from('posts').insert([{
-                title: comment, author_name: name, password: pw,
-                category: document.getElementById('p-category').value
+            // 🛠️ 에러 메시지 확인을 위한 상세 로직
+            const { data, error } = await _supabase.from('posts').insert([{ 
+                title: comment, 
+                author_name: name, 
+                password: pw, 
+                category: category 
             }]);
-            if (!error) location.reload();
-        }
 
-        async function saveReply(postId) {
-            const name = document.getElementById(`re-name-${postId}`).value;
-            const pw = document.getElementById(`re-pw-${postId}`).value;
-            const content = document.getElementById(`re-input-${postId}`).value;
-            if (!name || !pw || !content) return alert('답글 항목을 채워주세요.');
-            if (pw.length !== 4) return alert('답글 비밀번호도 4자리여야 합니다.');
-
-            await _supabase.from('replies').insert([{ post_id: postId, content, author_name: name, password: pw }]);
-            loadBoard();
-        }
-
-        async function deleteReply(id) {
-            const pw = prompt("답글 삭제 비밀번호 4자리를 입력하세요.");
-            if (!pw || pw.length !== 4) return;
-            const { data, error } = await _supabase.from('replies').delete().eq('id', id).eq('password', pw).select();
-            if (error || data.length === 0) alert("비밀번호 오류"); else loadBoard();
+            if (error) {
+                console.error("등록 에러:", error);
+                alert("등록에 실패했습니다: " + error.message);
+            } else {
+                location.reload();
+            }
         }
 
         async function updateReaction(id, type, val) {
@@ -198,7 +134,6 @@
         function toggleWriteSection(show) { document.getElementById('write-section').style.display = show ? 'block' : 'none'; }
         function toggleReplyArea(id) { const a = document.getElementById(`reply-area-${id}`); a.style.display = a.style.display === 'none' ? 'block' : 'none'; }
         function filterPosts() { const q = document.getElementById('board-search').value.toLowerCase(); renderPosts(allPosts.filter(p => p.title.toLowerCase().includes(q)), allReplies); }
-        
         window.onload = loadBoard;
     </script>
 </body>
