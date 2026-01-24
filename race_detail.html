@@ -117,15 +117,40 @@
             }
         });
 
-        async function loadData() {
-            if (!raceId) return location.href='races.html';
-            setNickname();
-            try {
-                const { data: race } = await _supabase.from('schedules').select('*').eq('id', raceId).single();
-                const { data: reviews } = await _supabase.from('reviews').select('*').eq('race_id', raceId);
-                renderPage(race, reviews || []);
-            } catch (err) { console.error(err); }
-        }
+async function loadData() {
+    if (!raceId) {
+        renderError("대회 ID가 없습니다.");
+        return;
+    }
+
+    try {
+        // 데이터 호출
+        const { data: race, error: raceError } = await _supabase
+            .from('schedules')
+            .select('*')
+            .eq('id', raceId)
+            .single();
+        
+        // 🚨 컬럼이 없거나 데이터가 없으면 여기서 catch로 넘어감
+        if (raceError) throw raceError;
+
+        const { data: pros } = await _supabase.from('influencer_reviews').select('score').eq('race_id', raceId);
+        const { data: users } = await _supabase.from('reviews').select('*').eq('race_id', raceId);
+
+        renderContent(race, pros || [], users || []);
+
+    } catch (err) {
+        console.error("상세 에러:", err);
+        // 무한 로딩을 멈추고 유저에게 에러 메시지 표시
+        document.getElementById('status-view').innerHTML = `
+            <div style="padding:20px; background:white; border-radius:15px;">
+                <h3 style="color:var(--main-color);">⚠️ 데이터 연동 오류</h3>
+                <p style="font-size:0.85rem; color:#666;">DB에 필요한 컬럼(race_date, description 등)이 있는지 확인해주세요.</p>
+                <p style="font-size:0.7rem; color:#ccc;">에러내용: ${err.message}</p>
+                <button onclick="location.href='races.html'" style="margin-top:10px; padding:8px 15px; border-radius:8px; border:none; background:#eee; font-weight:bold;">목록으로 돌아가기</button>
+            </div>`;
+    }
+}
 
         function renderPage(race, reviews) {
             document.getElementById('status-view').style.display = 'none';
