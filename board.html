@@ -12,36 +12,36 @@
         body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; padding-bottom: 50px; }
         .container { max-width: 800px; margin: 1rem auto; padding: 0 1rem; }
         .page-header { background: white; border-radius: 20px; padding: 1.2rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 1rem; }
-        .header-title { font-size: 1.4rem; font-weight: 900; }
         
         .search-container { margin-bottom: 1rem; display: flex; gap: 10px; }
         #board-search { flex: 1; padding: 12px 20px; border-radius: 15px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.04); font-size: 0.95rem; outline: none; }
         .write-btn-small { padding: 0 20px; background: var(--main-color); color: white; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; }
 
-        /* ✍️ 글쓰기 섹션 */
+        /* ✍️ 글쓰기 섹션 (줄바꿈/100자 제한 적용) */
         #write-section { display: none; background: white; border-radius: 24px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 8px 25px rgba(0,0,0,0.05); }
         .form-row { display: flex; gap: 10px; margin-bottom: 10px; }
         .form-input { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #eee; background: #fcfcfc; box-sizing: border-box; font-size: 0.95rem; }
-        .save-btn { width: 100%; padding: 15px; background: var(--main-color); color: white; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        /* 줄바꿈을 위한 textarea */
+        .form-textarea { height: 100px; resize: none; line-height: 1.5; }
 
-        /* 📋 게시글 카드 UI */
-        .post-card { background: white; border-radius: 20px; padding: 1.5rem; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); position: relative; }
+        .post-card { background: white; border-radius: 20px; padding: 1.5rem; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
         .post-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
         .post-actions { display: flex; gap: 12px; font-size: 0.78rem; color: #bbb; font-weight: 600; }
         .post-actions span { cursor: pointer; }
-        .post-actions span:hover { color: var(--main-color); }
 
-        .post-comment { font-size: 1.2rem; font-weight: 900; color: #222; margin-bottom: 10px; }
-        .post-meta { font-size: 0.8rem; color: #999; margin-bottom: 15px; display: flex; align-items: center; gap: 5px; }
+        /* 본문 가독성: 줄바꿈 표시 보존 */
+        .post-comment, .reply-text { font-size: 1.15rem; font-weight: 800; color: #222; margin-bottom: 10px; white-space: pre-wrap; word-break: break-all; }
 
-        /* 👍👎 상호작용 바 (싫어요 버튼 복구) */
         .interaction-bar { display: flex; gap: 20px; border-top: 1px solid #f8f9fa; padding-top: 15px; margin-top: 15px; }
-        .inter-btn { background: none; border: none; font-size: 0.9rem; color: #888; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 700; transition: 0.2s; }
-        .inter-btn:hover { color: var(--main-color); }
+        .inter-btn { background: none; border: none; font-size: 0.9rem; color: #888; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 700; }
 
-        /* 💬 답글 영역 (비밀번호 시스템 도입) */
+        /* 인라인 수정 모드 스타일 */
+        .edit-mode-area { margin: 10px 0; display: none; }
+        .edit-input { width: 100%; padding: 12px; border-radius: 12px; border: 2px solid var(--main-color); background: #fffafa; font-size: 1.1rem; font-family: inherit; resize: none; box-sizing: border-box; }
+
         .reply-container { margin-top: 15px; background: #f9f9f9; border-radius: 15px; padding: 15px; display: none; }
-        .reply-item { border-bottom: 1px solid #eee; padding: 10px 0; font-size: 0.88rem; display: flex; justify-content: space-between; align-items: center; }
+        .reply-item { border-bottom: 1px solid #eee; padding: 10px 0; font-size: 0.88rem; position: relative; }
+        .reply-text { font-size: 0.9rem; font-weight: normal; margin: 5px 0; }
         .reply-input-group { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 8px; border-top: 1px solid #eee; padding-top: 15px; }
         .reply-mini-input { padding: 8px 12px; border-radius: 8px; border: 1px solid #ddd; font-size: 0.8rem; }
     </style>
@@ -66,7 +66,7 @@
                     <option value="자유수다">자유수다</option><option value="훈련방법">훈련방법</option>
                     <option value="러닝장비">러닝장비</option><option value="대회후기">대회후기</option>
                 </select>
-                <input type="text" id="p-comment" class="form-input" placeholder="코멘트를 입력하세요.">
+                <textarea id="p-comment" class="form-input form-textarea" maxlength="100" placeholder="이야기를 나누어 보세요 (100자 이내)"></textarea>
             </div>
             <button class="save-btn" onclick="savePost()">등록하기</button>
             <button onclick="toggleWriteSection(false)" style="width:100%; background:none; border:none; color:#aaa; margin-top:10px; cursor:pointer;">취소</button>
@@ -90,16 +90,26 @@
             document.getElementById('posts').innerHTML = posts.map(post => {
                 const postReplies = replies.filter(re => re.post_id === post.id);
                 return `
-                <div class="post-card">
+                <div class="post-card" id="card-${post.id}">
                     <div class="post-header">
                         <span style="color:var(--main-color); font-size:0.8rem; font-weight:800;">${post.category}</span>
-                        <div class="post-actions">
-                            <span onclick="editPost('${post.id}')">수정</span>
+                        <div class="post-actions" id="actions-${post.id}">
+                            <span onclick="startEditPost('${post.id}')">수정</span>
                             <span onclick="deletePost('${post.id}')">삭제</span>
                         </div>
                     </div>
-                    <div class="post-comment">${post.title}</div>
-                    <div class="post-meta"><i class="fa-solid fa-user"></i> ${post.author_name} | <i class="fa-solid fa-calendar"></i> ${new Date(post.created_at).toLocaleDateString()}</div>
+
+                    <div id="text-${post.id}" class="post-comment">${post.title}</div>
+                    
+                    <div id="edit-area-${post.id}" class="edit-mode-area">
+                        <textarea id="edit-input-${post.id}" class="edit-input" maxlength="100">${post.title}</textarea>
+                        <div style="display:flex; gap:5px; margin-top:8px;">
+                            <button onclick="saveEditPost('${post.id}')" style="background:var(--main-color); color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; font-weight:bold;">저장</button>
+                            <button onclick="cancelEditPost('${post.id}')" style="background:#eee; border:none; padding:8px 15px; border-radius:8px; cursor:pointer;">취소</button>
+                        </div>
+                    </div>
+
+                    <div class="post-meta">👤 ${post.author_name} | 📅 ${new Date(post.created_at).toLocaleDateString()}</div>
                     
                     <div class="interaction-bar">
                         <button class="inter-btn" onclick="updateReaction('${post.id}', 'likes', ${post.likes || 0})"><i class="fa-regular fa-thumbs-up"></i> ${post.likes || 0}</button>
@@ -107,13 +117,22 @@
                         <button class="inter-btn" onclick="toggleReplyArea('${post.id}')"><i class="fa-regular fa-comment-dots"></i> 답글 ${postReplies.length}</button>
                     </div>
 
-                    <div id="reply-area-${post.id}" class="reply-container" style="display: ${postReplies.length > 0 ? 'block' : 'none'};">
+                    <div id="reply-area-${post.id}" class="reply-container">
                         <div id="reply-list-${post.id}">
                             ${postReplies.map(re => `
-                                <div class="reply-item">
-                                    <div><strong style="color:var(--main-color)">${re.author_name}</strong>: ${re.content}</div>
-                                    <div class="post-actions">
-                                        <span onclick="editReply('${re.id}')">수정</span>
+                                <div class="reply-item" id="reply-card-${re.id}">
+                                    <div id="reply-text-${re.id}" class="reply-text"><strong style="color:var(--main-color)">${re.author_name}</strong>: ${re.content}</div>
+                                    
+                                    <div id="reply-edit-area-${re.id}" class="edit-mode-area">
+                                        <textarea id="reply-edit-input-${re.id}" class="reply-input" style="width:100%; height:60px;" maxlength="100">${re.content}</textarea>
+                                        <div style="display:flex; gap:5px; margin-top:5px;">
+                                            <button onclick="saveEditReply('${re.id}')" style="background:var(--main-color); color:white; border:none; padding:5px 10px; border-radius:5px; font-size:0.8rem; cursor:pointer;">저장</button>
+                                            <button onclick="cancelEditReply('${re.id}')" style="background:#eee; border:none; padding:5px 10px; border-radius:5px; font-size:0.8rem; cursor:pointer;">취소</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="post-actions" id="reply-actions-${re.id}">
+                                        <span onclick="startEditReply('${re.id}')">수정</span>
                                         <span onclick="deleteReply('${re.id}')">삭제</span>
                                     </div>
                                 </div>`).join('')}
@@ -121,65 +140,89 @@
                         <div class="reply-input-group">
                             <input type="text" id="re-name-${post.id}" class="reply-mini-input" style="width:80px;" placeholder="작성자">
                             <input type="password" id="re-pw-${post.id}" class="reply-mini-input" style="width:70px;" placeholder="암호4자리" maxlength="4">
-                            <input type="text" id="re-input-${post.id}" class="reply-mini-input" style="flex:1;" placeholder="답글 내용을 입력하세요...">
-                            <button onclick="saveReply('${post.id}')" style="background:var(--main-color); color:white; border:none; border-radius:8px; padding:8px 15px; font-weight:bold; cursor:pointer;">등록</button>
+                            <textarea id="re-input-${post.id}" class="reply-mini-input" style="flex:1; height:40px; resize:none;" maxlength="100" placeholder="답글 입력..."></textarea>
+                            <button onclick="saveReply('${post.id}')" style="background:var(--main-color); color:white; border:none; border-radius:8px; padding:0 15px; font-weight:bold; cursor:pointer;">등록</button>
                         </div>
                     </div>
                 </div>`;
             }).join('');
         }
 
-        // [🛠️ 게시글 수정/삭제 로직]
-        async function deletePost(id) {
-            const pw = prompt("삭제 비밀번호 4자리를 입력하세요.");
+        // 🛠️ 인라인 수정 로직: 게시글
+        function startEditPost(id) {
+            const pw = prompt("비밀번호 4자리를 입력하세요.");
             if (!pw) return;
-            const { data, error } = await _supabase.from('posts').delete().eq('id', id).eq('password', pw).select();
-            if (error || data.length === 0) alert("비밀번호가 틀렸습니다."); else loadBoard();
+            document.getElementById(`text-${id}`).style.display = 'none';
+            document.getElementById(`actions-${id}`).style.display = 'none';
+            document.getElementById(`edit-area-${id}`).setAttribute('data-pw', pw); // 임시 보관
+            document.getElementById(`edit-area-${id}`).style.display = 'block';
         }
 
-        async function editPost(id) {
-            const pw = prompt("수정 비밀번호 4자리를 입력하세요.");
-            if (!pw) return;
-            const newTitle = prompt("수정할 코멘트를 입력하세요.");
+        function cancelEditPost(id) {
+            document.getElementById(`text-${id}`).style.display = 'block';
+            document.getElementById(`actions-${id}`).style.display = 'flex';
+            document.getElementById(`edit-area-${id}`).style.display = 'none';
+        }
+
+        async function saveEditPost(id) {
+            const newTitle = document.getElementById(`edit-input-${id}`).value;
+            const pw = document.getElementById(`edit-area-${id}`).getAttribute('data-pw');
             if (!newTitle) return;
             const { data, error } = await _supabase.from('posts').update({ title: newTitle }).eq('id', id).eq('password', pw).select();
-            if (error || data.length === 0) alert("비밀번호가 틀렸습니다."); else loadBoard();
+            if (error || data.length === 0) alert("비밀번호 오류 또는 업데이트 실패"); else loadBoard();
         }
 
-        // [🛠️ 답글 수정/삭제 로직]
-        async function deleteReply(id) {
-            const pw = prompt("답글 삭제 비밀번호 4자리를 입력하세요.");
+        // 🛠️ 인라인 수정 로직: 답글
+        function startEditReply(id) {
+            const pw = prompt("비밀번호 4자리를 입력하세요.");
             if (!pw) return;
-            const { data, error } = await _supabase.from('replies').delete().eq('id', id).eq('password', pw).select();
-            if (error || data.length === 0) alert("비밀번호 오류"); else loadBoard();
+            document.getElementById(`reply-text-${id}`).style.display = 'none';
+            document.getElementById(`reply-actions-${id}`).style.display = 'none';
+            document.getElementById(`reply-edit-area-${id}`).setAttribute('data-pw', pw);
+            document.getElementById(`reply-edit-area-${id}`).style.display = 'block';
         }
 
-        async function editReply(id) {
-            const pw = prompt("답글 수정 비밀번호 4자리를 입력하세요.");
-            if (!pw) return;
-            const newContent = prompt("수정할 답글 내용을 입력하세요.");
-            if (!newContent) return;
+        function cancelEditReply(id) {
+            document.getElementById(`reply-text-${id}`).style.display = 'block';
+            document.getElementById(`reply-actions-${id}`).style.display = 'flex';
+            document.getElementById(`reply-edit-area-${id}`).style.display = 'none';
+        }
+
+        async function saveEditReply(id) {
+            const newContent = document.getElementById(`reply-edit-input-${id}`).value;
+            const pw = document.getElementById(`reply-edit-area-${id}`).getAttribute('data-pw');
             const { data, error } = await _supabase.from('replies').update({ content: newContent }).eq('id', id).eq('password', pw).select();
             if (error || data.length === 0) alert("비밀번호 오류"); else loadBoard();
+        }
+
+        async function deletePost(id) {
+            const pw = prompt("삭제 비밀번호를 입력하세요.");
+            const { data, error } = await _supabase.from('posts').delete().eq('id', id).eq('password', pw).select();
+            if (error || data.length === 0) alert("비밀번호 불일치"); else loadBoard();
         }
 
         async function savePost() {
             const name = document.getElementById('p-name').value;
             const pw = document.getElementById('p-password').value;
             const comment = document.getElementById('p-comment').value;
-            if (!name || !pw || !comment) return alert('모든 항목을 입력해주세요.');
-            const { error } = await _supabase.from('posts').insert([{ title: comment, author_name: name, password: pw, category: document.getElementById('p-category').value }]);
-            if (error) alert(error.message); else location.reload();
+            if (!name || pw.length !== 4 || !comment) return alert('항목을 확인해주세요.');
+            await _supabase.from('posts').insert([{ title: comment, author_name: name, password: pw, category: document.getElementById('p-category').value }]);
+            location.reload();
         }
 
         async function saveReply(postId) {
             const name = document.getElementById(`re-name-${postId}`).value;
             const pw = document.getElementById(`re-pw-${postId}`).value;
             const content = document.getElementById(`re-input-${postId}`).value;
-            if (!name || !pw || !content) return alert('모든 항목을 입력해주세요.');
-            if (pw.length !== 4) return alert('비밀번호는 4자리여야 합니다.');
+            if (!name || pw.length !== 4 || !content) return alert('항목 확인');
             await _supabase.from('replies').insert([{ post_id: postId, content, author_name: name, password: pw }]);
             loadBoard();
+        }
+
+        async function deleteReply(id) {
+            const pw = prompt("답글 삭제 비밀번호");
+            const { data, error } = await _supabase.from('replies').delete().eq('id', id).eq('password', pw).select();
+            if (error || data.length === 0) alert("비밀번호 오류"); else loadBoard();
         }
 
         async function updateReaction(id, type, val) {
