@@ -10,190 +10,269 @@
     <style>
         :root { --main-color: #e91e63; --bg-color: #f0f2f5; --best-gold: #f1c40f; }
         body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; padding-bottom: 50px; }
-        .container { max-width: 800px; margin: 1rem auto; padding: 0 1rem; }
-        .page-header { background: white; border-radius: 20px; padding: 1.2rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 1rem; }
+        .container { max-width: 800px; margin: 0 auto; padding: 0 1rem; }
         
-        /* 🏷️ 2. 카테고리 필터 칩 스타일 */
-        .filter-container { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; -ms-overflow-style: none; scrollbar-width: none; }
-        .filter-container::-webkit-scrollbar { display: none; }
-        .chip { padding: 8px 18px; background: white; border-radius: 20px; font-size: 0.85rem; font-weight: 800; color: #666; cursor: pointer; white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.04); transition: 0.3s; }
+        /* 💎 UX 강화: Glassmorphism 헤더 & 스티키 검색바 */
+        .page-header { background: white; border-radius: 0 0 25px 25px; padding: 1.5rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 1rem; }
+        .sticky-ui { position: sticky; top: 60px; z-index: 100; background: rgba(240, 242, 245, 0.8); backdrop-filter: blur(10px); padding: 10px 0; }
+        
+        .filter-container { display: flex; gap: 8px; overflow-x: auto; padding: 5px 0 10px; scrollbar-width: none; }
+        .chip { padding: 10px 20px; background: white; border-radius: 20px; font-size: 0.85rem; font-weight: 800; color: #666; cursor: pointer; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: 0.2s; }
         .chip.active { background: var(--main-color); color: white; }
 
-        .search-container { margin-bottom: 1rem; display: flex; gap: 10px; }
-        #board-search { flex: 1; padding: 12px 20px; border-radius: 15px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.04); font-size: 0.95rem; outline: none; }
-        .write-btn-small { padding: 0 20px; background: var(--main-color); color: white; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; }
+        .search-container { display: flex; gap: 10px; margin-bottom: 5px; }
+        #board-search { flex: 1; padding: 14px 20px; border-radius: 18px; border: 2px solid transparent; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.04); font-size: 0.95rem; outline: none; transition: 0.3s; }
+        #board-search:focus { border-color: var(--main-color); }
+        .write-btn-small { padding: 0 25px; background: var(--main-color); color: white; border: none; border-radius: 18px; font-weight: 800; cursor: pointer; transition: 0.2s; }
 
-        /* ✍️ 1. 글자 수 카운터 및 프로그레스 바 */
-        #write-section { display: none; background: white; border-radius: 24px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 8px 25px rgba(0,0,0,0.05); }
-        .counter-container { display: flex; justify-content: flex-end; font-size: 0.75rem; color: #999; margin-bottom: 5px; }
-        .progress-bar-bg { height: 4px; background: #eee; border-radius: 2px; margin-bottom: 15px; overflow: hidden; }
+        /* ✍️ 글쓰기 섹션 (글자수 카운터 포함) */
+        #write-section { display: none; background: white; border-radius: 24px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); animation: slideDown 0.3s ease-out; }
+        @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .counter-info { display: flex; justify-content: flex-end; font-size: 0.75rem; color: #999; margin-bottom: 5px; }
+        .progress-bar-bg { height: 4px; background: #eee; border-radius: 2px; margin-bottom: 12px; overflow: hidden; }
         #progress-bar { height: 100%; width: 0%; background: var(--main-color); transition: 0.2s; }
-        .form-textarea { height: 100px; resize: none; border: 1px solid #eee; border-radius: 12px; width: 100%; padding: 12px; box-sizing: border-box; font-size: 1rem; }
+        .form-textarea { height: 100px; resize: none; border: 1px solid #eee; border-radius: 12px; width: 100%; padding: 15px; box-sizing: border-box; font-size: 1rem; line-height: 1.5; outline: none; }
 
-        /* 🏆 3. 베스트 코멘트 및 카드 UI */
-        .post-card { background: white; border-radius: 20px; padding: 1.5rem; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); position: relative; }
-        .post-card.is-best { border: 2px solid var(--best-gold); background: #fffdf5; }
-        .best-badge { display: inline-block; background: var(--best-gold); color: #333; padding: 2px 8px; border-radius: 6px; font-size: 0.65rem; font-weight: 900; margin-bottom: 8px; }
+        /* 📋 게시글 카드 UX */
+        .post-card { background: white; border-radius: 24px; padding: 1.5rem; margin-bottom: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); transition: 0.3s; position: relative; }
+        .post-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.06); }
+        .post-card.is-best { border: 2.5px solid var(--best-gold); }
+        .best-label { background: var(--best-gold); color: #333; padding: 3px 10px; border-radius: 8px; font-size: 0.65rem; font-weight: 900; margin-bottom: 10px; display: inline-block; }
         
-        /* 🚨 4. 신고/블라인드 처리 */
-        .blinded-text { color: #ccc; font-style: italic; font-size: 0.9rem; text-align: center; padding: 10px; border: 1px dashed #eee; border-radius: 10px; }
+        .post-comment { font-size: 1.15rem; font-weight: 800; color: #1a1a1a; margin-bottom: 12px; white-space: pre-wrap; word-break: break-all; }
+        .edit-area { display: none; margin: 10px 0; }
+        .edit-input { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid var(--main-color); font-size: 1.1rem; resize: none; box-sizing: border-box; font-family: inherit; }
 
-        .post-comment { font-size: 1.15rem; font-weight: 800; color: #222; margin-bottom: 10px; white-space: pre-wrap; word-break: break-all; }
-        .interaction-bar { display: flex; gap: 20px; border-top: 1px solid #f8f9fa; padding-top: 15px; margin-top: 15px; }
-        .inter-btn { background: none; border: none; font-size: 0.85rem; color: #888; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 700; }
-        .inter-btn.report:hover { color: #ff5252; }
+        /* 💬 답글 영역 */
+        .reply-container { margin-top: 15px; background: #f8f9fa; border-radius: 18px; padding: 15px; display: none; }
+        .reply-item { border-bottom: 1px solid #eee; padding: 10px 0; position: relative; }
+        .reply-item:last-child { border-bottom: none; }
+        .reply-text { font-size: 0.92rem; color: #444; white-space: pre-wrap; margin: 5px 0; }
+        .reply-actions { display: flex; gap: 10px; font-size: 0.72rem; color: #ccc; justify-content: flex-end; cursor: pointer; }
+        
+        /* 🚨 무한 스크롤 로딩 표시 */
+        #loading-indicator { text-align: center; padding: 20px; color: #aaa; font-size: 0.85rem; display: none; }
     </style>
 </head>
 <body>
     <script src="navbar.js"></script>
     <div class="container">
-        <div class="page-header"><h2 class="header-title">💬 러너 광장</h2></div>
+        <div class="page-header"><h2 style="margin:0; font-size:1.5rem;">💬 러너 광장</h2></div>
 
-        <div class="filter-container">
-            <div class="chip active" onclick="filterCategory('전체', this)">전체</div>
-            <div class="chip" onclick="filterCategory('자유수다', this)">자유</div>
-            <div class="chip" onclick="filterCategory('훈련방법', this)">훈련</div>
-            <div class="chip" onclick="filterCategory('러닝장비', this)">장비</div>
-            <div class="chip" onclick="filterCategory('대회후기', this)">대회</div>
-        </div>
+        <div class="sticky-ui">
+            <div class="filter-container">
+                <div class="chip active" onclick="filterCategory('전체', this)">전체</div>
+                <div class="chip" onclick="filterCategory('자유수다', this)">자유</div>
+                <div class="chip" onclick="filterCategory('훈련방법', this)">훈련</div>
+                <div class="chip" onclick="filterCategory('러닝장비', this)">장비</div>
+                <div class="chip" onclick="filterCategory('대회후기', this)">대회</div>
+            </div>
 
-        <div class="search-container">
-            <input type="text" id="board-search" placeholder="코멘트 검색..." onkeyup="handleSearch()">
-            <button class="write-btn-small" onclick="toggleWriteSection(true)">✍️ 쓰기</button>
+            <div class="search-container">
+                <input type="text" id="board-search" placeholder="코멘트 검색..." onkeyup="handleSearch()">
+                <button class="write-btn-small" onclick="toggleWriteSection(true)">✍️ 쓰기</button>
+            </div>
         </div>
 
         <div id="write-section">
-            <div class="form-row" style="display:flex; gap:10px; margin-bottom:10px;">
-                <input type="text" id="p-name" style="flex:1; padding:12px; border-radius:12px; border:1px solid #eee;" placeholder="작성자명">
-                <input type="password" id="p-password" style="width:100px; padding:12px; border-radius:12px; border:1px solid #eee;" placeholder="암호(4자리)" maxlength="4" inputmode="numeric">
+            <div style="display:flex; gap:10px; margin-bottom:12px;">
+                <input type="text" id="p-name" class="form-input" style="flex:1; padding:12px; border-radius:12px; border:1px solid #eee;" placeholder="닉네임">
+                <input type="password" id="p-password" style="width:100px; padding:12px; border-radius:12px; border:1px solid #eee;" placeholder="암호4자리" maxlength="4" inputmode="numeric">
             </div>
-            
-            <div class="counter-container"><span id="char-count">0</span> / 100</div>
+            <div class="counter-info"><span id="char-count">0</span> / 100</div>
             <div class="progress-bar-bg"><div id="progress-bar"></div></div>
-            
-            <textarea id="p-comment" class="form-textarea" maxlength="100" oninput="updateCharCount(this)" placeholder="러너들과 100자 코멘트를 나눠보세요."></textarea>
-            
-            <button onclick="savePost()" style="width:100%; padding:15px; background:var(--main-color); color:white; border:none; border-radius:15px; font-weight:bold; margin-top:15px; cursor:pointer;">등록하기</button>
-            <button onclick="toggleWriteSection(false)" style="width:100%; background:none; border:none; color:#aaa; margin-top:10px; cursor:pointer;">취소</button>
+            <textarea id="p-comment" class="form-textarea" maxlength="100" oninput="updateCharCount(this)" placeholder="러닝에 대한 생각을 자유롭게 적어주세요."></textarea>
+            <button onclick="savePost()" style="width:100%; padding:16px; background:var(--main-color); color:white; border:none; border-radius:16px; font-weight:800; margin-top:15px; cursor:pointer;">등록하기</button>
+            <button onclick="toggleWriteSection(false)" style="width:100%; background:none; border:none; color:#aaa; margin-top:10px; cursor:pointer; font-weight:600;">취소</button>
         </div>
 
         <div id="posts"></div>
+        <div id="loading-indicator"><i class="fa-solid fa-circle-notch fa-spin"></i> 다음 코멘트를 불러오는 중...</div>
     </div>
 
     <script>
         const _supabase = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         let allPosts = [], allReplies = [], currentCategory = '전체';
+        let page = 0, itemsPerPage = 10, isFetching = false, hasMore = true;
 
-        // ✍️ 1. 실시간 글자 수 카운터 로직
+        // ✍️ 글자수 카운터
         function updateCharCount(el) {
             const len = el.value.length;
             document.getElementById('char-count').innerText = len;
             document.getElementById('progress-bar').style.width = len + '%';
         }
 
-        async function loadBoard() {
-            const { data: p } = await _supabase.from('posts').select('*').order('created_at', { ascending: false });
+        // 🚨 1. 무한 스크롤 초기 로드 및 데이터 바인딩
+        async function loadInitialData() {
+            page = 0; hasMore = true;
+            document.getElementById('posts').innerHTML = '';
+            await fetchNextPage();
             const { data: r } = await _supabase.from('replies').select('*').order('created_at', { ascending: true });
-            allPosts = p || []; allReplies = r || [];
-            filterPosts();
+            allReplies = r || [];
+            renderAll();
         }
 
-        // 🏷️ 2. 카테고리 필터 칩 기능
-        function filterCategory(cat, el) {
-            currentCategory = cat;
-            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-            el.classList.add('active');
-            filterPosts();
+        async function fetchNextPage() {
+            if (isFetching || !hasMore) return;
+            isFetching = true;
+            document.getElementById('loading-indicator').style.display = 'block';
+
+            let query = _supabase.from('posts').select('*').order('created_at', { ascending: false });
+            if (currentCategory !== '전체') query = query.eq('category', currentCategory);
+            
+            const start = page * itemsPerPage;
+            const end = start + itemsPerPage - 1;
+            const { data, error } = await query.range(start, end);
+
+            if (data) {
+                if (page === 0) allPosts = data; else allPosts = [...allPosts, ...data];
+                if (data.length < itemsPerPage) hasMore = false;
+                page++;
+            }
+            isFetching = false;
+            document.getElementById('loading-indicator').style.display = 'none';
         }
 
-        function handleSearch() { filterPosts(); }
+        // 🚨 2. 무한 스크롤 이벤트 감지
+        window.onscroll = function() {
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 100) {
+                if (hasMore && !isFetching) {
+                    fetchNextPage().then(() => renderAll());
+                }
+            }
+        };
 
-        function filterPosts() {
+        function renderAll() {
             const query = document.getElementById('board-search').value.toLowerCase();
             let filtered = allPosts;
-            if (currentCategory !== '전체') filtered = filtered.filter(p => p.category === currentCategory);
             if (query) filtered = filtered.filter(p => p.title.toLowerCase().includes(query));
             
-            // 🏆 3. 베스트 코멘트 정렬 로직: 좋아요 5개 이상 우선
-            filtered.sort((a, b) => {
-                const aBest = (a.likes >= 5 ? 1 : 0);
-                const bBest = (b.likes >= 5 ? 1 : 0);
-                if (aBest !== bBest) return bBest - aBest;
-                return new Date(b.created_at) - new Date(a.created_at);
-            });
-
+            // 베스트 정렬 (좋아요 5개 이상)
+            filtered.sort((a, b) => (b.likes >= 5 ? 1 : 0) - (a.likes >= 5 ? 1 : 0));
             renderPosts(filtered);
         }
 
         function renderPosts(posts) {
             document.getElementById('posts').innerHTML = posts.map(post => {
-                const isBest = post.likes >= 5;
-                const isBlinded = (post.reports || 0) >= 5; // 🚨 4. 신고 5회 시 블라인드
+                const isBest = (post.likes || 0) >= 5;
+                const isBlinded = (post.reports || 0) >= 5;
                 const postReplies = allReplies.filter(re => re.post_id === post.id);
 
                 return `
                 <div class="post-card ${isBest ? 'is-best' : ''}">
-                    ${isBest ? '<div class="best-badge"><i class="fa-solid fa-crown"></i> BEST COMMENT</div>' : ''}
+                    ${isBest ? '<div class="best-label"><i class="fa-solid fa-crown"></i> BEST</div>' : ''}
                     <div class="post-header">
                         <span style="color:var(--main-color); font-size:0.75rem; font-weight:800;">${post.category}</span>
-                        <div style="font-size:0.75rem; color:#bbb;">
-                            <span onclick="deletePost('${post.id}')" style="cursor:pointer">삭제</span>
+                        <div class="post-actions">
+                            <span onclick="startEditPost('${post.id}')">수정</span>
+                            <span onclick="deletePost('${post.id}')">삭제</span>
                         </div>
                     </div>
 
-                    ${isBlinded ? 
-                        '<div class="blinded-text">다수의 신고로 인해 블라인드 처리된 코멘트입니다.</div>' : 
-                        `<div class="post-comment">${post.title}</div>`
-                    }
+                    ${isBlinded ? '<div class="blinded-text">신고 누적으로 블라인드 처리되었습니다.</div>' : 
+                        `<div id="text-${post.id}" class="post-comment">${post.title}</div>`}
+                    
+                    <div id="edit-area-${post.id}" class="edit-area">
+                        <textarea id="edit-input-${post.id}" class="edit-input" maxlength="100">${post.title}</textarea>
+                        <div style="display:flex; gap:5px; margin-top:8px;">
+                            <button onclick="saveEditPost('${post.id}')" style="background:var(--main-color); color:white; border:none; padding:10px 20px; border-radius:10px; cursor:pointer; font-weight:bold;">저장</button>
+                            <button onclick="cancelEditPost('${post.id}')" style="background:#eee; border:none; padding:10px 20px; border-radius:10px; cursor:pointer;">취소</button>
+                        </div>
+                    </div>
 
-                    <div style="font-size:0.75rem; color:#999;">👤 ${post.author_name} | 📅 ${new Date(post.created_at).toLocaleDateString()}</div>
+                    <div class="post-meta">👤 ${post.author_name} | 📅 ${new Date(post.created_at).toLocaleDateString()}</div>
                     
                     <div class="interaction-bar">
-                        <button class="inter-btn" onclick="updateReaction('${post.id}', 'likes', ${post.likes || 0})">
-                            <i class="fa-regular fa-thumbs-up"></i> ${post.likes || 0}
-                        </button>
-                        <button class="inter-btn" onclick="toggleReplyArea('${post.id}')">
-                            <i class="fa-regular fa-comment-dots"></i> 답글 ${postReplies.length}
-                        </button>
-                        <button class="inter-btn report" onclick="reportPost('${post.id}', ${post.reports || 0})">
-                            <i class="fa-regular fa-bell"></i> 신고
-                        </button>
+                        <button class="inter-btn" onclick="updateReaction('${post.id}', 'likes', ${post.likes || 0})"><i class="fa-regular fa-thumbs-up"></i> ${post.likes || 0}</button>
+                        <button class="inter-btn" onclick="toggleReplyArea('${post.id}')"><i class="fa-regular fa-comment-dots"></i> 답글 ${postReplies.length}</button>
+                        <button class="inter-btn" onclick="reportPost('${post.id}', ${post.reports || 0})" style="color:#ff5252"><i class="fa-regular fa-bell"></i></button>
                     </div>
 
                     <div id="reply-area-${post.id}" class="reply-container">
-                        ${postReplies.map(re => `<div style="padding:8px 0; font-size:0.85rem; border-bottom:1px solid #eee;"><strong>${re.author_name}</strong>: ${re.content}</div>`).join('')}
+                        <div id="reply-list-${post.id}">
+                            ${postReplies.map(re => `
+                                <div class="reply-item">
+                                    <div id="re-text-${re.id}" class="reply-text"><strong>${re.author_name}</strong>: ${re.content}</div>
+                                    <div id="re-edit-area-${re.id}" style="display:none; margin:10px 0;">
+                                        <textarea id="re-edit-input-${re.id}" class="edit-input" style="font-size:0.9rem; height:60px;">${re.content}</textarea>
+                                        <button onclick="saveEditReply('${re.id}')" style="background:var(--main-color); color:white; border:none; padding:5px 10px; border-radius:5px; font-size:0.8rem; cursor:pointer;">저장</button>
+                                        <button onclick="cancelEditReply('${re.id}')" style="background:#eee; border:none; padding:5px 10px; border-radius:5px; font-size:0.8rem; cursor:pointer;">취소</button>
+                                    </div>
+                                    <div class="reply-actions">
+                                        <span onclick="startEditReply('${re.id}')">수정</span>
+                                        <span onclick="deleteReply('${re.id}')">삭제</span>
+                                    </div>
+                                </div>`).join('')}
+                        </div>
+                        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:15px; border-top:1px solid #eee; padding-top:15px;">
+                            <input type="text" id="re-name-${post.id}" class="reply-mini-input" style="width:80px;" placeholder="닉네임">
+                            <input type="password" id="re-pw-${post.id}" class="reply-mini-input" style="width:70px;" placeholder="암호4자리" maxlength="4">
+                            <textarea id="re-input-${post.id}" style="flex:1; height:40px; border:1px solid #ddd; border-radius:10px; padding:10px; font-size:0.85rem; resize:none;" placeholder="답글 입력..."></textarea>
+                            <button onclick="saveReply('${post.id}')" style="background:var(--main-color); color:white; border:none; border-radius:10px; padding:0 15px; font-weight:bold; cursor:pointer;">등록</button>
+                        </div>
                     </div>
                 </div>`;
             }).join('');
         }
 
-        async function updateReaction(id, type, val) {
-            const { error } = await _supabase.from('posts').update({ [type]: val + 1 }).eq('id', id);
-            if (!error) loadBoard();
+        // [🛠️ 3 & 4. 수정/삭제 권한 및 기능 복구]
+        async function saveEditPost(id) {
+            const newTitle = document.getElementById(`edit-input-${id}`).value;
+            const pw = document.getElementById(`edit-area-${id}`).getAttribute('data-pw');
+            const { data, error } = await _supabase.from('posts').update({ title: newTitle }).eq('id', id).eq('password', pw).select();
+            if (error || data.length === 0) alert("비밀번호 불일치!"); else loadInitialData();
         }
 
-        // 🚨 4. 신고 로직 (익명 신고 허용)
-        async function reportPost(id, currentVal) {
-            if (!confirm("이 코멘트를 부적절한 게시글로 신고하시겠습니까?")) return;
-            const { error } = await _supabase.from('posts').update({ reports: currentVal + 1 }).eq('id', id);
-            if (!error) { alert("신고가 접수되었습니다."); loadBoard(); }
+        async function deletePost(id) {
+            const pw = prompt("비밀번호 4자리를 입력하세요.");
+            if (!pw) return;
+            const { data, error } = await _supabase.from('posts').delete().eq('id', id).eq('password', pw).select();
+            if (error || data.length === 0) alert("비밀번호 오류!"); else loadInitialData();
         }
 
+        async function saveReply(postId) {
+            const name = document.getElementById(`re-name-${postId}`).value;
+            const pw = document.getElementById(`re-pw-${postId}`).value;
+            const content = document.getElementById(`re-input-${postId}`).value;
+            if (!name || pw.length !== 4 || !content) return alert('항목을 확인해주세요.');
+            const { error } = await _supabase.from('replies').insert([{ post_id: postId, content, author_name: name, password: pw }]);
+            if (error) alert(error.message); else loadInitialData();
+        }
+
+        async function deleteReply(id) {
+            const pw = prompt("답글 암호를 입력하세요.");
+            const { data, error } = await _supabase.from('replies').delete().eq('id', id).eq('password', pw).select();
+            if (error || data.length === 0) alert("비밀번호 오류"); else loadInitialData();
+        }
+
+        // 기타 헬퍼 함수
+        function startEditPost(id) {
+            const pw = prompt("비밀번호 4자리를 입력하세요."); if (!pw) return;
+            document.getElementById(`text-${id}`).style.display = 'none';
+            document.getElementById(`edit-area-${id}`).style.display = 'block';
+            document.getElementById(`edit-area-${id}`).setAttribute('data-pw', pw);
+        }
+        function cancelEditPost(id) { document.getElementById(`text-${id}`).style.display = 'block'; document.getElementById(`edit-area-${id}`).style.display = 'none'; }
+        function filterCategory(cat, el) { 
+            currentCategory = cat; 
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active')); 
+            el.classList.add('active'); loadInitialData(); 
+        }
+        function toggleWriteSection(show) { document.getElementById('write-section').style.display = show ? 'block' : 'none'; }
+        function toggleReplyArea(id) { const a = document.getElementById(`reply-area-${id}`); a.style.display = a.style.display === 'none' ? 'block' : 'none'; }
+        function handleSearch() { renderAll(); }
+        async function updateReaction(id, type, val) { await _supabase.from('posts').update({ [type]: val + 1 }).eq('id', id); loadInitialData(); }
+        async function reportPost(id, val) { if (confirm("신고하시겠습니까?")) { await _supabase.from('posts').update({ reports: val + 1 }).eq('id', id); loadInitialData(); } }
         async function savePost() {
             const name = document.getElementById('p-name').value;
             const pw = document.getElementById('p-password').value;
             const comment = document.getElementById('p-comment').value;
-            if (!name || pw.length !== 4 || !comment) return alert('항목을 확인해주세요.');
-            
-            const { error } = await _supabase.from('posts').insert([{ 
-                title: comment, author_name: name, password: pw, category: currentCategory === '전체' ? '자유수다' : currentCategory 
-            }]);
-            if (!error) location.reload();
+            if (!name || pw.length !== 4 || !comment) return alert('항목 확인');
+            await _supabase.from('posts').insert([{ title: comment, author_name: name, password: pw, category: currentCategory === '전체' ? '자유수다' : currentCategory }]);
+            location.reload();
         }
 
-        function toggleWriteSection(show) { document.getElementById('write-section').style.display = show ? 'block' : 'none'; }
-        function toggleReplyArea(id) { const a = document.getElementById(`reply-area-${id}`); a.style.display = a.style.display === 'none' ? 'block' : 'none'; }
-        window.onload = loadBoard;
+        window.onload = loadInitialData;
     </script>
 </body>
 </html>
