@@ -1,0 +1,31 @@
+<style>
+    /* 씨네21 감성 그리드 */
+    .race-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 25px; padding: 20px 0; }
+    .race-card { cursor: pointer; transition: 0.3s; }
+    .race-card:hover { transform: translateY(-8px); }
+    .poster-img { width: 100%; aspect-ratio: 2/3; border-radius: 12px; object-fit: cover; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+    .race-info { margin-top: 12px; }
+    .race-title { font-weight: 800; font-size: 1.05rem; margin-bottom: 5px; }
+    .race-star { color: #f1c40f; font-size: 0.9rem; font-weight: 700; }
+</style>
+
+<div class="container">
+    <div class="page-header"><h2>📅 대회 일정</h2></div>
+    <div id="race-list" class="race-grid">
+        </div>
+</div>
+
+<script>
+    async function loadRaces() {
+        const { data: races } = await _supabase.from('races').select('*');
+        document.getElementById('race-list').innerHTML = races.map(r => `
+            <div class="race-card" onclick="location.href='race_detail.html?id=${r.id}'">
+                <img src="${r.poster_url}" class="poster-img">
+                <div class="race-info">
+                    <div class="race-title">${r.title}</div>
+                    <div class="race-star">★ 8.5</div> </div>
+            </div>
+        `).join('');
+    }
+    window.onload = loadRaces;
+</script>
