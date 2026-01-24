@@ -3,54 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>런스탠다드 | 마라톤 평점 커뮤니티</title>
+    <title>런스탠다드 | 홈</title>
+    <script src="navbar.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root { --main-color: #e91e63; --bg-color: #f0f2f5; }
-        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; padding-bottom: 50px; }
-        .container { max-width: 800px; margin: 1rem auto; padding: 0 1rem; }
-        .page-header { background: white; border-radius: 20px; padding: 1.2rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 1rem; }
-        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .dash-card { background: white; border-radius: 20px; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.04); text-align: center; }
-        .dash-card h3 { font-size: 0.85rem; color: #888; margin-bottom: 10px; }
-        .dash-value { font-size: 1.8rem; font-weight: 900; color: var(--main-color); }
-        .full-card { grid-column: span 2; text-align: left; }
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; }
+        .container { max-width: 800px; margin: 20px auto; padding: 0 1rem; }
+        .hero-section { background: white; border-radius: 25px; padding: 40px 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .welcome-msg { font-size: 1.5rem; font-weight: 900; color: #222; }
     </style>
 </head>
 <body>
-    <script src="navbar.js"></script>
     <div class="container">
-        <div class="page-header">
-            <h2 style="margin:0; font-size: 1.5rem;">🏃 RunStandard 관제 센터</h2>
-            <p style="color:#666; font-size:0.85rem; margin-top:5px;">반갑습니다, 호원M님! 오늘의 목표를 확인하세요.</p>
-        </div>
-        
-        <div class="dashboard-grid">
-            <div class="dash-card">
-                <h3>💍 Wedding D-Day</h3>
-                <div class="dash-value" id="wedding-dday">계산 중...</div>
-            </div>
-            <div class="dash-card">
-                <h3>🏁 Marathon D-Day</h3>
-                <div class="dash-value" id="marathon-dday">계산 중...</div>
-            </div>
-            <div class="dash-card full-card">
-                <h3>📢 실시간 커뮤니티 소식</h3>
-                <p style="font-size:0.9rem; color:#444;">새로운 대회 리포트와 게시글이 준비 중입니다.</p>
-            </div>
+        <div class="hero-section">
+            <div class="welcome-msg">🏃 오늘보다 더 나은 레이스, <span style="color:var(--main-color)">런스탠다드</span></div>
+            <p style="color:#888; margin-top:15px;">전국의 마라톤 대회 평점과 러너들의 생생한 코멘트를 확인하세요.</p>
         </div>
     </div>
-
-    <script>
-        function getDday(targetDate) {
-            const now = new Date();
-            const target = new Date(targetDate);
-            const diff = target - now;
-            const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-            return days >= 0 ? `D-${days}` : `D+${Math.abs(days)}`;
-        }
-        // 2026-02-07 결혼 / 2026-10-25 마라톤 목표 가정
-        document.getElementById('wedding-dday').innerText = getDday('2026-02-07');
-        document.getElementById('marathon-dday').innerText = getDday('2026-10-25');
-    </script>
 </body>
 </html>
