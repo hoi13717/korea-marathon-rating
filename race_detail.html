@@ -11,323 +11,87 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <style>
         :root { 
-            --main-color: #e91e63; 
-            --pro-color: #66cc33; 
-            --bg-color: #f8f9fa;
-            --score-red: #ff5252; 
-            --score-orange: #ffa726; 
-            --score-green: #4caf50; 
+            --main-color: #e91e63; --pro-color: #66cc33; --bg-color: #f8f9fa;
+            --score-red: #ff5252; --score-orange: #ffa726; --score-green: #4caf50; 
         }
-        body { 
-            font-family: 'Pretendard', sans-serif; 
-            background-color: var(--bg-color); 
-            margin: 0; 
-            padding-bottom: 50px; 
-            color: #333; 
-        }
-        .container { 
-            max-width: 800px; 
-            margin: 0 auto; 
-            padding: 20px 1rem; 
-        }
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; padding-bottom: 50px; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px 1rem; }
 
         /* 16. 영상 영역 크기 유지 */
-        .video-container { 
-            width: 100%; 
-            aspect-ratio: 16 / 9; 
-            border-radius: 20px; 
-            overflow: hidden; 
-            background: #000; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
-            margin-bottom: 25px; 
-        }
+        .video-container { width: 100%; aspect-ratio: 16 / 9; border-radius: 20px; overflow: hidden; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 25px; }
 
         /* 13. 관리자 개요 영역 */
-        .admin-box { 
-            background: #fff; 
-            padding: 25px; 
-            border-radius: 20px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
-            margin-bottom: 25px; 
-            border-left: 6px solid var(--main-color); 
-        }
-        .admin-box h4 { 
-            margin: 0 0 10px 0; 
-            font-size: 1rem; 
-            color: var(--main-color); 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
-        }
-        .admin-text {
-            font-size: 0.95rem;
-            line-height: 1.6;
-            color: #555;
-        }
+        .admin-box { background: #fff; padding: 25px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 25px; border-left: 6px solid var(--main-color); }
+        .admin-box h4 { margin: 0 0 10px 0; font-size: 1rem; color: var(--main-color); display: flex; align-items: center; gap: 8px; }
 
         /* 1, 14. 수직형 스코어 영역 */
-        .score-stack { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 15px; 
-            margin-bottom: 30px; 
-        }
-        .score-card { 
-            background: white; 
-            border-radius: 25px; 
-            padding: 25px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.02); 
-        }
-        .score-header { 
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
-        }
-        .badge-circle { 
-            width: 70px; 
-            height: 70px; 
-            border-radius: 20px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            color: white; 
-            font-weight: 900; 
-        }
-        .num-lg { 
-            font-size: 1.8rem; 
-            line-height: 1; 
-        }
-        .label-sm { 
-            font-size: 0.6rem; 
-            margin-top: 3px; 
-            font-weight: 800; 
-        }
+        .score-stack { display: flex; flex-direction: column; gap: 15px; margin-bottom: 30px; }
+        .score-card { background: white; border-radius: 25px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+        .score-header { display: flex; align-items: center; gap: 15px; }
+        .badge-circle { width: 75px; height: 75px; border-radius: 22px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; font-weight: 900; }
+        .num-lg { font-size: 2rem; line-height: 1; }
+        .label-sm { font-size: 0.65rem; margin-top: 4px; font-weight: 800; }
 
         /* 2, 15. 유저 평점 영역 내 베스트 댓글 */
-        .best-mini-container { 
-            margin-top: 15px; 
-            border-top: 1px solid #f5f5f5; 
-            padding-top: 15px; 
-        }
-        .best-mini-item { 
-            background: #fffdf0; 
-            border: 1px solid #fff5cc; 
-            padding: 12px; 
-            border-radius: 12px; 
-            margin-bottom: 8px; 
-            font-size: 0.85rem; 
-        }
-        .best-tag { 
-            background: #ffc107; 
-            color: #856404; 
-            font-size: 0.65rem; 
-            padding: 2px 6px; 
-            border-radius: 4px; 
-            font-weight: 900; 
-            margin-right: 6px; 
-        }
-        .more-text-btn {
-            color: var(--main-color);
-            cursor: pointer;
-            text-decoration: underline;
-            font-weight: 600;
-        }
-        .more-text-btn:hover {
-            opacity: 0.7;
-        }
-
-        /* 8, 9. 리뷰 아이템 */
-        .review-item { 
-            background: white; 
-            border-radius: 20px; 
-            padding: 20px; 
-            margin-bottom: 15px; 
-            box-shadow: 0 3px 12px rgba(0,0,0,0.02); 
-        }
-        .review-meta { 
-            display: flex; 
-            justify-content: space-between; 
-            margin-bottom: 12px; 
-            font-size: 0.85rem; 
-            color: #999; 
-        }
-        .review-scores { 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 8px; 
-            margin-bottom: 12px; 
-        }
-        .score-tag { 
-            background: #f5f5f5; 
-            padding: 5px 10px; 
-            border-radius: 12px; 
-            font-size: 0.75rem; 
-            font-weight: 700; 
-            color: #666; 
-        }
+        .best-mini-container { margin-top: 15px; border-top: 1px solid #f5f5f5; padding-top: 15px; }
+        .best-mini-item { background: #fffdf0; border: 1px solid #fff5cc; padding: 12px; border-radius: 12px; margin-bottom: 8px; font-size: 0.88rem; }
+        .best-tag { background: #ffc107; color: #856404; font-size: 0.68rem; padding: 2px 6px; border-radius: 5px; font-weight: 900; margin-right: 6px; }
 
         /* 9. 점수별 색상 규격 */
-        .bg-red { background: var(--score-red); } 
-        .bg-orange { background: var(--score-orange); } 
-        .bg-green { background: var(--score-green); }
+        .bg-red { background: var(--score-red); } .bg-orange { background: var(--score-orange); } .bg-green { background: var(--score-green); }
 
         /* 12. 코멘트 공백 최적화 */
-        .review-text { 
-            font-size: 0.95rem; 
-            line-height: 1.6; 
-            color: #444; 
-            white-space: pre-wrap; 
-            word-break: break-all; 
-        }
-
-        /* 공통 버튼 */
-        .interaction-bar { 
-            display: flex; 
-            gap: 18px; 
-            margin-top: 15px; 
-            border-top: 1px solid #f8f8f8; 
-            padding-top: 12px; 
-        }
-        .inter-btn { 
-            background: none; 
-            border: none; 
-            font-size: 0.8rem; 
-            color: #999; 
-            cursor: pointer; 
-            font-weight: 700; 
-            display: flex; 
-            align-items: center; 
-            gap: 5px; 
-            transition: color 0.2s;
-        }
-        .inter-btn:hover {
-            color: var(--main-color);
-        }
-        .review-actions {
-            margin-left: auto;
-        }
-        .review-actions span {
-            color: #999;
-            font-size: 0.8rem;
-            cursor: pointer;
-            font-weight: 700;
-        }
-        .review-actions span:hover {
-            color: var(--main-color);
-        }
+        .review-text { font-size: 1rem; line-height: 1.7; color: #444; white-space: pre-wrap; word-break: break-all; }
 
         /* 11. 연관 대회 */
-        .related-grid { 
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 15px; 
-            margin-top: 20px; 
-        }
-        .rel-card { 
-            background: white; 
-            border-radius: 15px; 
-            overflow: hidden; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.04); 
-            cursor: pointer; 
-            transition: 0.3s; 
-        }
-        .rel-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-        }
-        .rel-title { 
-            padding: 12px; 
-            font-size: 0.85rem; 
-            font-weight: 800; 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-        }
+        .related-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
+        .rel-card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.04); cursor: pointer; transition: 0.3s; }
+        .rel-title { padding: 12px; font-size: 0.85rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .load-more-btn {
-            padding: 12px 35px; 
-            border-radius: 50px; 
-            border: 1px solid #ddd; 
-            background: #fff; 
-            cursor: pointer; 
-            font-weight: 800; 
-            color: #888;
-            transition: all 0.3s;
-        }
-        .load-more-btn:hover {
-            background: var(--main-color);
-            color: white;
-            border-color: var(--main-color);
-        }
+        /* 상호작용 바 */
+        .interaction-bar { display: flex; gap: 20px; margin-top: 15px; border-top: 1px solid #f8f8f8; padding-top: 15px; }
+        .inter-btn { background: none; border: none; font-size: 0.85rem; color: #999; cursor: pointer; font-weight: 700; display: flex; align-items: center; gap: 6px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div id="status-view" style="text-align:center; padding:100px 0;">
-            <i class="fa-solid fa-spinner fa-spin fa-3x" style="color:#eee;"></i>
-        </div>
+        <div id="status-view" style="text-align:center; padding:120px 0;"><i class="fa-solid fa-spinner fa-spin fa-3x" style="color:#eee;"></i></div>
 
         <div id="main-view" style="display:none;">
-            <h2 id="race-title" style="font-weight: 900; letter-spacing: -1.5px; margin-bottom: 20px; font-size: 1.8rem;"></h2>
+            <h2 id="race-title" style="font-weight: 900; letter-spacing: -1.8px; margin-bottom: 25px; font-size: 2rem;"></h2>
             
-            <!-- 16. 영상 영역 -->
-            <div class="video-container">
-                <iframe id="youtube-player" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
-            </div>
+            <div class="video-container"><iframe id="youtube-player" width="100%" height="100%" frameborder="0" allowfullscreen></iframe></div>
 
-            <!-- 13. 관리자 개요 영역 -->
             <div class="admin-box">
-                <h4><i class="fa-solid fa-file-invoice"></i> 사이트 관리자 한마디</h4>
+                <h4><i class="fa-solid fa-shield-halved"></i> 런스탠다드 대회 인사이트</h4>
                 <div id="admin-desc" class="admin-text"></div>
             </div>
 
-            <!-- 1, 14. 수직형 스코어 영역 -->
             <div class="score-stack">
-                <!-- 전문가 평균 평점 -->
                 <div class="score-card">
                     <div class="score-header">
-                        <div class="badge-circle" style="background:var(--pro-color);">
-                            <span class="num-lg" id="pro-val">-</span>
-                            <span class="label-sm">PROS</span>
-                        </div>
-                        <div>
-                            <h4 style="margin:0; font-size:1.1rem;">전문가 평균 평점</h4>
-                            <p style="margin:2px 0 0; font-size:0.8rem; color:#999;">러닝 인플루언서 공식 기록</p>
-                        </div>
+                        <div class="badge-circle" style="background:var(--pro-color);"><span class="num-lg" id="pro-val">-</span><span class="label-sm">PROS</span></div>
+                        <div><h4 style="margin:0; font-size:1.15rem;">전문가 평점</h4><p style="margin:3px 0 0; font-size:0.85rem; color:#999;">러닝 인플루언서 공식 기록</p></div>
                     </div>
                 </div>
                 
-                <!-- 러너 평균 평점 + 베스트 댓글 -->
                 <div class="score-card">
                     <div class="score-header">
-                        <div class="badge-circle" id="user-avg-badge">
-                            <span class="num-lg" id="user-val">-</span>
-                            <span class="label-sm">USERS</span>
-                        </div>
-                        <div>
-                            <h4 style="margin:0; font-size:1.1rem;">러너 평균 평점</h4>
-                            <p id="user-count" style="margin:2px 0 0; font-size:0.8rem; color:#999;"></p>
-                        </div>
+                        <div class="badge-circle" id="user-avg-badge"><span class="num-lg" id="user-val">-</span><span class="label-sm">USERS</span></div>
+                        <div><h4 style="margin:0; font-size:1.15rem;">러너 평균 평점</h4><p id="user-count" style="margin:3px 0 0; font-size:0.85rem; color:#999;"></p></div>
                     </div>
-                    <!-- 15. 베스트 댓글 영역 -->
                     <div id="best-comments-area" class="best-mini-container"></div>
                 </div>
             </div>
 
-            <!-- 3. 리뷰 리스트 -->
             <div id="review-list"></div>
             
-            <!-- 3. 더보기 버튼 -->
-            <div id="load-more-container" style="text-align:center; margin:30px 0;">
-                <button class="load-more-btn" onclick="loadMore()">리뷰 10개 더보기</button>
+            <div id="load-more-container" style="text-align:center; margin:35px 0;">
+                <button class="load-more-btn" style="padding:14px 40px; border-radius:60px; border:1.5px solid #ddd; background:#fff; cursor:pointer; font-weight:800; color:#777;" onclick="loadMore()">리뷰 10개 더보기</button>
             </div>
 
-            <!-- 11. 연관 대회 -->
-            <div style="margin-top:50px; border-top:1px solid #eee; padding-top:30px;">
-                <h3 style="font-size:1.1rem; font-weight:900;">
-                    <i class="fa-solid fa-link"></i> 지금 가장 핫한 레이스
-                </h3>
+            <div style="margin-top:60px; border-top:1.5px solid #eee; padding-top:40px;">
+                <h3 style="font-size:1.25rem; font-weight:900; letter-spacing:-1.2px;"><i class="fa-solid fa-fire-flame-curved" style="color:var(--main-color);"></i> 조회수 급상승 레이스</h3>
                 <div class="related-grid" id="related-list"></div>
             </div>
         </div>
@@ -341,7 +105,6 @@
         let offset = 0;
         let bestIds = [];
 
-        // 1, 9. 점수 색상 규격 함수
         function getScoreColorClass(score) {
             if (score <= 3) return 'bg-red';
             if (score <= 6) return 'bg-orange';
@@ -349,316 +112,118 @@
         }
 
         async function init() {
-            if (!raceId) {
-                alert('대회 ID가 없습니다.');
-                return;
-            }
-
+            if (!raceId) return;
             try {
-                // 조회수 증가
+                // 조회수 업데이트
                 await _supabase.rpc('increment_views', { r_id: raceId });
 
-                // 대회 정보 가져오기
-                const { data: race, error: raceError } = await _supabase
-                    .from('schedules')
-                    .select('*')
-                    .eq('id', raceId)
-                    .single();
-
-                if (raceError) throw raceError;
-
-                // 대회 정보 표시
+                const { data: race } = await _supabase.from('schedules').select('*').eq('id', raceId).single();
                 document.getElementById('race-title').innerText = race.title;
-                document.getElementById('admin-desc').innerText = race.description || '대회 정보가 곧 업데이트 됩니다.';
-                
-                // 16. 영상 URL 설정
-                if (race.video_url) {
-                    document.getElementById('youtube-player').src = `https://www.youtube.com/embed/${race.video_url}`;
+                document.getElementById('admin-desc').innerText = race.description || '운영 정보가 곧 업데이트될 예정입니다.';
+                if (race.video_url) document.getElementById('youtube-player').src = `https://www.youtube.com/embed/${race.video_url}`;
+
+                // 1. 대회 평균치 계산
+                const { data: all } = await _supabase.from('reviews').select('*').eq('race_id', raceId);
+                if (all && all.length > 0) {
+                    const avg = (all.reduce((s, r) => s + (r.course+r.management+r.supplies+r.souvenirs+r.cost_effective), 0) / (all.length * 5)).toFixed(1);
+                    document.getElementById('user-val').innerText = avg;
+                    document.getElementById('user-avg-badge').className = `badge-circle ${getScoreColorClass(avg)}`;
+                    document.getElementById('user-count').innerText = `${all.length}명의 러너가 데이터를 제공함`;
+
+                    // 2, 7, 15. 베스트 3 (블라인드 제외)
+                    const valids = all.filter(r => !(r.reports >= 5 && r.reports > (r.likes || 0)));
+                    const sortedBests = valids.sort((a,b) => (b.likes || 0) - (a.likes || 0)).slice(0, 3);
+                    bestIds = sortedBests.map(b => b.id);
+                    renderBestComments(sortedBests);
                 }
 
-                // 1. 전체 리뷰 가져오기 및 평균 계산
-                const { data: allReviews, error: reviewsError } = await _supabase
-                    .from('reviews')
-                    .select('*')
-                    .eq('race_id', raceId);
-
-                if (reviewsError) throw reviewsError;
-
-                if (allReviews && allReviews.length > 0) {
-                    // 1. 대회 평균치 계산 (5개 항목의 평균)
-                    const totalSum = allReviews.reduce((sum, r) => {
-                        return sum + (r.course + r.management + r.supplies + r.souvenirs + r.cost_effective);
-                    }, 0);
-                    const avgScore = (totalSum / (allReviews.length * 5)).toFixed(1);
-                    
-                    document.getElementById('user-val').innerText = avgScore;
-                    document.getElementById('user-avg-badge').className = `badge-circle ${getScoreColorClass(avgScore)}`;
-                    document.getElementById('user-count').innerText = `${allReviews.length}명의 러너가 참여함`;
-
-                    // 2, 7. 베스트 댓글 3개 선정 (신고 블라인드 제외)
-                    const validReviews = allReviews.filter(r => {
-                        const isBlinded = (r.reports >= 5 && r.reports > (r.likes || 0));
-                        return !isBlinded;
-                    });
-
-                    const sortedByLikes = validReviews.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-                    const bestComments = sortedByLikes.slice(0, 3);
-                    bestIds = bestComments.map(b => b.id);
-
-                    renderBestComments(bestComments);
-                } else {
-                    document.getElementById('user-val').innerText = '-';
-                    document.getElementById('user-count').innerText = '아직 참여한 러너가 없습니다';
-                }
-
-                // 3. 최초 10개 리뷰 로드
                 await loadMore();
+                loadRelatedRaces();
 
-                // 11. 연관 대회 로드
-                await loadRelatedRaces();
-
-                // 로딩 완료
                 document.getElementById('status-view').style.display = 'none';
                 document.getElementById('main-view').style.display = 'block';
-
-            } catch (err) {
-                console.error('초기화 오류:', err);
-                alert('대회 정보를 불러오는데 실패했습니다.');
-            }
+            } catch (err) { console.error(err); }
         }
 
-        // 2, 15. 베스트 댓글 렌더링
-        function renderBestComments(reviews) {
+        // 2, 15. 유저 평점 영역 내 베스트 댓글 렌더링
+        function renderBestComments(data) {
             const area = document.getElementById('best-comments-area');
-            
-            if (!reviews || reviews.length === 0) {
-                area.style.display = 'none';
-                return;
-            }
-
-            area.style.display = 'block';
-            area.innerHTML = reviews.map(r => {
-                // 개별 평균 점수 계산
-                const avgScore = ((r.course + r.management + r.supplies + r.souvenirs + r.cost_effective) / 5).toFixed(1);
-                const cleanText = (r.comment || '').trim();
-                const isLong = cleanText.length > 50;
-                const shortText = isLong ? cleanText.substring(0, 50) + '...' : cleanText;
-                
+            if(data.length === 0) return area.style.display = 'none';
+            area.innerHTML = data.map(r => {
+                const avg = ((r.course+r.management+r.supplies+r.souvenirs+r.cost_effective)/5).toFixed(1);
+                const cleanText = r.comment.trim();
+                const isLong = cleanText.length > 60;
                 return `
                 <div class="best-mini-item">
-                    <span class="best-tag">BEST</span> 
-                    <b style="color:var(--main-color); margin-right:6px;">${avgScore}점</b>
-                    <span id="best-txt-${r.id}">${shortText}</span>
-                    ${isLong ? `<span class="more-text-btn" onclick="expandBestComment('${r.id}', \`${cleanText.replace(/`/g, '\\`').replace(/\\/g, '\\\\')}\`, this)">내용 더보기</span>` : ''}
+                    <span class="best-tag"><i class="fa-solid fa-crown"></i> BEST</span> <b>${avg}점</b>
+                    <span id="best-txt-${r.id}">${isLong ? cleanText.substring(0, 60) + '...' : cleanText}</span>
+                    ${isLong ? `<span style="color:var(--main-color); font-weight:800; cursor:pointer; margin-left:5px;" onclick="this.parentElement.querySelector('#best-txt-${r.id}').innerText='${cleanText.replace(/'/g, "\\'")}'; this.remove();">내용 더보기</span>` : ''}
                 </div>`;
             }).join('');
         }
 
-        // 베스트 댓글 전체 보기
-        function expandBestComment(id, fullText, btn) {
-            document.getElementById(`best-txt-${id}`).innerText = fullText;
-            btn.remove();
-        }
-
         // 3. 10개씩 페이징 로드
         async function loadMore() {
-            try {
-                const { data, error } = await _supabase
-                    .from('reviews')
-                    .select('*')
-                    .eq('race_id', raceId)
-                    .order('created_at', { ascending: false })
-                    .range(offset, offset + 9);
-
-                if (error) throw error;
-
-                if (data && data.length > 0) {
-                    const reviewList = document.getElementById('review-list');
-                    
-                    // 베스트 댓글이 아닌 것만 표시
-                    const normalReviews = data.filter(r => !bestIds.includes(r.id));
-                    const html = normalReviews.map(r => createReviewItem(r)).join('');
-                    reviewList.insertAdjacentHTML('beforeend', html);
-
-                    offset += 10;
-
-                    // 더 이상 데이터가 없으면 더보기 버튼 숨김
-                    if (data.length < 10) {
-                        document.getElementById('load-more-container').style.display = 'none';
-                    }
-                }
-
-            } catch (err) {
-                console.error('리뷰 로드 오류:', err);
+            const { data } = await _supabase.from('reviews').select('*').eq('race_id', raceId)
+                .order('created_at', { ascending: false }).range(offset, offset + 9);
+            if (data) {
+                const list = document.getElementById('review-list');
+                list.insertAdjacentHTML('beforeend', data.filter(r => !bestIds.includes(r.id)).map(r => createReviewItem(r)).join(''));
+                offset += 10;
+                if(data.length < 10) document.getElementById('load-more-container').style.display = 'none';
             }
         }
 
         // 8, 9, 12. 리뷰 아이템 생성
         function createReviewItem(r) {
-            // 9. 개별 평균 점수 계산
-            const avgScore = ((r.course + r.management + r.supplies + r.souvenirs + r.cost_effective) / 5).toFixed(1);
-            
-            // 4. 블라인드 여부 체크
-            const isBlinded = (r.reports >= 5 && r.reports > (r.likes || 0));
-            
-            // 12. 코멘트 공백 최적화
-            const cleanComment = r.comment ? r.comment.trim().replace(/\n{3,}/g, '\n\n') : '코멘트가 없습니다.';
+            const avg = ((r.course+r.management+r.supplies+r.souvenirs+r.cost_effective)/5).toFixed(1);
+            const isBlinded = (r.reports >= 5 && r.reports > (r.likes || 0)); // 4. 블라인드 로직
+            const cleanComment = r.comment ? r.comment.trim().replace(/\n{3,}/g, '\n\n') : '코멘트 없음';
 
             return `
             <div class="review-item" id="rev-${r.id}">
                 <div class="review-meta">
-                    <span style="font-weight:900;">
-                        👤 ${r.author_name} 
-                        <span class="score-tag ${getScoreColorClass(avgScore)}" style="color:white; margin-left:5px;">
-                            ${avgScore}점
-                        </span>
-                    </span>
+                    <span style="font-weight:900;">👤 ${r.author_name} <span class="badge-circle ${getScoreColorClass(avg)}" style="width:40px; height:25px; border-radius:8px; font-size:0.75rem; display:inline-flex; vertical-align:middle; margin-left:8px;">${avg}</span></span>
                     <span>${new Date(r.created_at).toLocaleDateString()}</span>
                 </div>
                 ${!isBlinded ? `
                     <div class="review-scores">
-                        <span class="score-tag">🗺️ 코스 ${r.course}</span>
-                        <span class="score-tag">🏢 운영 ${r.management}</span>
-                        <span class="score-tag">🥛 보급 ${r.supplies}</span>
-                        <span class="score-tag">👕 기념품 ${r.souvenirs}</span>
+                        <span class="score-tag">🗺️ 코스 ${r.course}</span><span class="score-tag">🏢 운영 ${r.management}</span>
+                        <span class="score-tag">🥛 보급 ${r.supplies}</span><span class="score-tag">👕 기념품 ${r.souvenirs}</span>
                         <span class="score-tag">💰 가성비 ${r.cost_effective}</span>
                     </div>
                     <div class="review-text">${cleanComment}</div>
-                ` : `
-                    <p style="color:#bbb; font-style:italic; font-size:0.85rem;">
-                        신고 누적으로 블라인드 처리되었습니다.
-                    </p>
-                `}
+                ` : '<p style="color:#bbb; font-style:italic;">안전 가이드라인 위반으로 블라인드 되었습니다.</p>'}
                 <div class="interaction-bar">
-                    <button class="inter-btn" onclick="handleLike('${r.id}', ${r.likes || 0})">
-                        <i class="fa-regular fa-thumbs-up"></i> ${r.likes || 0}
-                    </button>
-                    <button class="inter-btn" onclick="handleReport('${r.id}', ${r.reports || 0})">
-                        <i class="fa-solid fa-ban"></i> 신고
-                    </button>
-                    <div class="review-actions">
-                        <span onclick="handleDelete('${r.id}')">삭제</span>
-                    </div>
+                    <button class="inter-btn" onclick="handleLike('${r.id}', ${r.likes || 0})"><i class="fa-regular fa-thumbs-up"></i> ${r.likes || 0}</button>
+                    <button class="inter-btn" onclick="handleReport('${r.id}', ${r.reports || 0})"><i class="fa-solid fa-flag"></i> 신고하기</button>
+                    <div class="review-actions"><span onclick="handleDelete('${r.id}')">삭제</span></div>
                 </div>
             </div>`;
         }
 
-        // 11. 연관 대회 로드 (미개최 대회 중 조회수 순)
+        // 11. 연관 대회 (조회수 기준)
         async function loadRelatedRaces() {
-            try {
-                const today = new Date().toISOString().split('T')[0];
-                
-                const { data, error } = await _supabase
-                    .from('schedules')
-                    .select('*')
-                    .neq('id', raceId)
-                    .gte('race_date', today)
-                    .order('views', { ascending: false })
-                    .limit(4);
-
-                if (error) throw error;
-
-                if (data && data.length > 0) {
-                    document.getElementById('related-list').innerHTML = data.map(r => `
-                        <div class="rel-card" onclick="location.href='race_detail.html?id=${r.id}'">
-                            <img src="${r.poster_url || 'https://via.placeholder.com/400x300'}" 
-                                 style="width:100%; height:120px; object-fit:cover;"
-                                 alt="${r.title}">
-                            <div class="rel-title">${r.title}</div>
-                        </div>
-                    `).join('');
-                } else {
-                    document.getElementById('related-list').innerHTML = '<p style="color:#999; grid-column: 1 / -1; text-align:center;">연관 대회가 없습니다.</p>';
-                }
-
-            } catch (err) {
-                console.error('연관 대회 로드 오류:', err);
+            const { data } = await _supabase.from('schedules').select('*').neq('id', raceId)
+                .gte('race_date', new Date().toISOString().split('T')[0])
+                .order('views', { ascending: false }).limit(4);
+            if (data) {
+                document.getElementById('related-list').innerHTML = data.map(r => `
+                    <div class="rel-card" onclick="location.href='race_detail.html?id=${r.id}'">
+                        <img src="${r.poster_url || 'https://via.placeholder.com/400x300'}" style="width:100%; height:130px; object-fit:cover;">
+                        <div class="rel-title">${r.title}</div>
+                    </div>`).join('');
             }
         }
 
-        // 5. 좋아요 기능
-        async function handleLike(id, currentLikes) {
-            try {
-                const { data, error } = await _supabase
-                    .from('reviews')
-                    .update({ likes: currentLikes + 1 })
-                    .eq('id', id)
-                    .select();
-
-                if (error) throw error;
-
-                if (data && data.length > 0) {
-                    location.reload();
-                } else {
-                    alert('좋아요 처리에 실패했습니다.');
-                }
-
-            } catch (err) {
-                console.error('좋아요 오류:', err);
-                alert('좋아요 처리 중 오류가 발생했습니다.');
-            }
+        async function handleLike(id, cur) { await _supabase.from('reviews').update({ likes: cur+1 }).eq('id', id); location.reload(); }
+        async function handleReport(id, cur) { if(!confirm("신고하시겠습니까?")) return; await _supabase.from('reviews').update({ reports: cur+1 }).eq('id', id); alert("신고 완료"); location.reload(); }
+        async function handleDelete(id) { 
+            const pw = prompt("작성 시 설정한 암호 6자리"); 
+            const { data } = await _supabase.from('reviews').delete().eq('id', id).eq('password', pw).select();
+            if(data && data.length > 0) location.reload(); else alert("암호 불일치");
         }
 
-        // 6. 신고 기능
-        async function handleReport(id, currentReports) {
-            if (!confirm("이 리뷰를 신고하시겠습니까?")) {
-                return;
-            }
-
-            try {
-                const { data, error } = await _supabase
-                    .from('reviews')
-                    .update({ reports: currentReports + 1 })
-                    .eq('id', id)
-                    .select();
-
-                if (error) throw error;
-
-                if (data && data.length > 0) {
-                    alert('신고가 접수되었습니다.');
-                    location.reload();
-                } else {
-                    alert('신고 처리에 실패했습니다.');
-                }
-
-            } catch (err) {
-                console.error('신고 오류:', err);
-                alert('신고 처리 중 오류가 발생했습니다.');
-            }
-        }
-
-        // 10. 삭제 기능
-        async function handleDelete(id) {
-            const password = prompt("리뷰 작성 시 입력한 암호 6자리를 입력하세요:");
-            
-            if (!password) {
-                return;
-            }
-
-            try {
-                const { data, error } = await _supabase
-                    .from('reviews')
-                    .delete()
-                    .eq('id', id)
-                    .eq('password', password)
-                    .select();
-
-                if (error) throw error;
-
-                if (data && data.length > 0) {
-                    alert('리뷰가 삭제되었습니다.');
-                    location.reload();
-                } else {
-                    alert('암호가 틀렸습니다.');
-                }
-
-            } catch (err) {
-                console.error('삭제 오류:', err);
-                alert('삭제 처리 중 오류가 발생했습니다.');
-            }
-        }
-
-        // 페이지 로드 시 초기화
         window.onload = init;
     </script>
 </body>
