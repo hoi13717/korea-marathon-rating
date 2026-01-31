@@ -14,42 +14,35 @@
         body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; padding-top: 85px; padding-bottom: 50px; }
         .container { max-width: 800px; margin: 0 auto; padding: 10px 1rem; }
         
-        /* A. 상단 컨트롤 타워 */
+        /* 1. 레이아웃 복구: 검색 및 필터 정합성 */
         .search-filter-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
         #race-search { flex: 1; min-width: 250px; padding: 12px 20px; border-radius: 15px; border: 1px solid #ddd; font-size: 0.9rem; outline: none; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
         
-        .mini-filter { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 5px 0; }
+        .mini-filter { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 5px 0; flex-shrink: 0; }
         .mini-filter::-webkit-scrollbar { display: none; }
         .mini-chip { padding: 8px 15px; background: white; border-radius: 12px; font-size: 0.75rem; font-weight: 800; color: #888; cursor: pointer; white-space: nowrap; border: 1px solid #eee; transition: 0.2s; }
         .mini-chip.active { background: var(--main-color); color: white; border-color: var(--main-color); }
 
-        /* B. 리스트 제어 (정렬) */
         .sort-row { display: flex; justify-content: flex-end; gap: 15px; margin-top: 20px; font-size: 0.8rem; font-weight: 700; color: #bbb; }
         .sort-link { cursor: pointer; transition: 0.2s; padding-bottom: 2px; }
         .sort-link.active { color: #222; border-bottom: 2px solid #222; }
 
-        /* C. 씨네21 스타일 그리드 (2:3 비율) */
+        /* 씨네21 스타일 그리드 */
         .race-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 25px; margin-top: 20px; }
         .race-card { cursor: pointer; transition: 0.3s; position: relative; }
         .race-card:hover { transform: translateY(-8px); }
-        
         .poster-wrapper { position: relative; width: 100%; aspect-ratio: 2 / 3; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); background: #e2e2e2; }
         .poster-img { width: 100%; height: 100%; object-fit: cover; }
         
-        /* 정보 계층화 */
         .race-info { margin-top: 12px; }
         .status-badge { display: inline-block; padding: 3px 7px; border-radius: 5px; font-size: 0.65rem; font-weight: 900; margin-bottom: 6px; }
         .status-rateable { background: #fff0f5; color: var(--main-color); }
         .status-closed { background: #f5f5f5; color: #9e9e9e; }
-        
         .race-title { font-size: 1rem; font-weight: 900; color: #222; margin-bottom: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .rating-box { display: flex; align-items: center; gap: 4px; font-size: 1rem; font-weight: 900; color: var(--main-color); }
-        .race-date-text { font-size: 0.75rem; color: #aaa; margin-top: 4px; font-weight: 500; }
-
-        /* 7. 최적화: 더보기 버튼 */
+        
         .load-more-wrap { text-align: center; margin: 40px 0; }
-        .load-more-btn { padding: 12px 40px; border-radius: 50px; background: white; border: 1.5px solid #ddd; font-weight: 800; color: #666; cursor: pointer; transition: 0.2s; font-family: inherit; }
-        .load-more-btn:hover { border-color: var(--main-color); color: var(--main-color); }
+        .load-more-btn { padding: 12px 40px; border-radius: 50px; background: white; border: 1.5px solid #ddd; font-weight: 800; color: #666; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -71,7 +64,9 @@
         </div>
 
         <div id="race-list" class="race-grid">
-            <div style="grid-column: 1/-1; text-align: center; padding: 100px 0; color: #ccc;">데이터 로딩 중...</div>
+            <div id="loading-spinner" style="grid-column: 1/-1; text-align: center; padding: 100px 0; color: #ccc;">
+                <i class="fa-solid fa-circle-notch fa-spin fa-2x"></i><br><br>데이터를 불러오는 중입니다...
+            </div>
         </div>
 
         <div class="load-more-wrap" id="load-more-area" style="display:none;">
@@ -81,33 +76,28 @@
 
     <script>
         const _supabase = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-        let rawRaces = []; 
-        let filteredRaces = [];
-        let limitCount = 10; // 7. 최초 10개만 노출
-
-        let filterState = '평가가능'; // 3. 기본 필터
-        let sortState = 'date';
+        let rawRaces = []; let filteredRaces = [];
+        let limitCount = 10;
+        let filterState = '평가가능'; let sortState = 'date';
 
         async function init() {
             try {
-                // 2. 4대 지표 조인 쿼리 (schedules + reviews)
+                // 2. 무한 로딩 방지: 테이블명 불일치 체크
                 const { data, error } = await _supabase
                     .from('schedules')
                     .select('*, reviews(course, management, souvenirs, cost_effective)');
                 
+                if (error) throw error; // 에러 발생 시 catch로 이동
+
                 if (data) {
                     const today = new Date(); today.setHours(0,0,0,0);
-                    
                     rawRaces = data.map(race => {
-                        // 4대 지표 평균 (코스/운영/기념품/가성비)
                         let avg = 0;
                         if (race.reviews && race.reviews.length > 0) {
-                            const sum = race.reviews.reduce((acc, r) => 
-                                acc + (r.course + r.management + r.souvenirs + r.cost_effective), 0);
+                            const sum = race.reviews.reduce((acc, r) => acc + (r.course + r.management + r.souvenirs + r.cost_effective), 0);
                             avg = (sum / (race.reviews.length * 4)).toFixed(1);
                         }
 
-                        // 3. 평가 가능 로직: 오늘 기준 개최일 포함 +7일까지
                         const rDate = new Date(race.race_date); rDate.setHours(0,0,0,0);
                         const diffDays = Math.floor((today - rDate) / (1000 * 60 * 60 * 24));
                         
@@ -119,7 +109,10 @@
                     });
                     applyAllProcesses();
                 }
-            } catch (err) { console.error("데이터 수신 오류:", err); }
+            } catch (err) { 
+                console.error("Critical Error:", err);
+                document.getElementById('race-list').innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:50px; color:#e91e63;">데이터 로딩에 실패했습니다. DB 연결을 확인해주세요.</div>`;
+            }
         }
 
         function handleFilter(val, el) {
@@ -137,22 +130,17 @@
             applyAllProcesses();
         }
 
-        function handleSearch() {
-            limitCount = 10;
-            applyAllProcesses();
-        }
+        function handleSearch() { limitCount = 10; applyAllProcesses(); }
 
         function applyAllProcesses() {
             const kw = document.getElementById('race-search').value.toLowerCase();
-            
-            // 5. 필터링 공정
             let result = rawRaces.filter(r => r.title.toLowerCase().includes(kw));
+
             if (filterState === '평가가능') result = result.filter(r => r.status === '평가가능');
             else if (filterState === '평가완료') result = result.filter(r => r.status === '평가완료');
             else if (filterState === '국내') result = result.filter(r => r.is_domestic);
             else if (filterState === '해외') result = result.filter(r => !r.is_domestic);
 
-            // 4. 정렬 공정
             if (sortState === 'date') result.sort((a,b) => new Date(b.race_date) - new Date(a.race_date));
             else result.sort((a,b) => b.score - a.score);
 
@@ -160,17 +148,14 @@
             render();
         }
 
-        function increaseLimit() {
-            limitCount += 10; // 7. 10개씩 추가 로드
-            render();
-        }
+        function increaseLimit() { limitCount += 10; render(); }
 
         function render() {
             const listEl = document.getElementById('race-list');
             const batch = filteredRaces.slice(0, limitCount);
             
             if (batch.length === 0) {
-                listEl.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:80px 0; color:#ccc; font-weight:700;">대회가 창고에 없습니다.</div>`;
+                listEl.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:80px 0; color:#ccc;">조건에 맞는 대회가 없습니다.</div>`;
                 document.getElementById('load-more-area').style.display = 'none';
                 return;
             }
@@ -181,21 +166,15 @@
                         <img src="${r.poster_url || 'https://via.placeholder.com/300x450'}" class="poster-img">
                     </div>
                     <div class="race-info">
-                        <div class="status-badge ${r.status === '평가가능' ? 'status-rateable' : 'status-closed'}">
-                            ${r.status === '평가가능' ? '평가 가능' : (r.status === '평가완료' ? '평가 완료' : '진행 예정')}
-                        </div>
+                        <div class="status-badge ${r.status === '평가가능' ? 'status-rateable' : 'status-closed'}">${r.status}</div>
                         <div class="race-title">${r.title}</div>
-                        <div class="rating-box">
-                            <i class="fa-solid fa-star" style="font-size:0.8rem;"></i>
-                            <span>${r.score.toFixed(1)}</span>
-                        </div>
-                        <div class="race-date-text">대회일자 : ${r.race_date}</div>
+                        <div class="rating-box"><i class="fa-solid fa-star" style="font-size:0.8rem;"></i><span>${r.score.toFixed(1)}</span></div>
+                        <div style="font-size:0.75rem; color:#aaa; margin-top:4px;">대회일자 : ${r.race_date}</div>
                     </div>
                 </div>
             `).join('');
 
-            document.getElementById('load-more-area').style.display = 
-                (limitCount < filteredRaces.length) ? 'block' : 'none';
+            document.getElementById('load-more-area').style.display = (limitCount < filteredRaces.length) ? 'block' : 'none';
         }
 
         window.onload = init;
