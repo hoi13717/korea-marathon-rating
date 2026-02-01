@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>런스탠다드 | 대회 목록</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="navbar.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <style>
+        :root { --main-color: #e91e63; --bg-color: #f0f2f5; }
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); margin: 0; padding-top: 85px; padding-bottom: 50px; }
+        .container { max-width: 800px; margin: 0 auto; padding: 10px 1rem; }
+        
+        /* A. 레이아웃 복구: 검색 및 필터 가독성 확보 */
+        .search-filter-row { display: flex; align-items: center; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        #race-search { flex: 1; min-width: 250px; padding: 14px 20px; border-radius: 15px; border: 1.5px solid #ddd; font-size: 0.95rem; outline: none; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        
+        .mini-filter { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 5px 0; }
+        .mini-filter::-webkit-scrollbar { display: none; }
+        .mini-chip { padding: 8px 16px; background: white; border-radius: 12px; font-size: 0.8rem; font-weight: 800; color: #888; cursor: pointer; white-space: nowrap; border: 1px solid #eee; transition: 0.2s; }
+        .mini-chip.active { background: var(--main-color); color: white; border-color: var(--main-color); }
+
+        /* B. 정렬 섹션 */
+        .sort-row { display: flex; justify-content: flex-end; gap: 15px; margin-top: 25px; font-size: 0.8rem; font-weight: 700; color: #bbb; }
+        .sort-link { cursor: pointer; transition: 0.2s; padding-bottom: 2px; }
+        .sort-link.active { color: #222; border-bottom: 2.5px solid #222; }
+
+        /* C. 씨네21 스타일 그리드 (2:3 비율 고정) */
+        .race-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 25px; margin-top: 20px; }
+        .race-card { cursor: pointer; transition: 0.3s; position: relative; }
+        .race-card:hover { transform: translateY(-10px); }
+        
+        .poster-wrapper { position: relative; width: 100%; aspect-ratio: 2 / 3; border-radius: 14px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); background: #e2e2e2; }
+        .poster-img { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* 정보 계층 디자인 */
+        .race-info { margin-top: 12px; }
+        .status-badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 900; margin-bottom: 6px; }
+        .status-rateable { background: #fff0f5; color: var(--main-color); }
+        .status-closed { background: #f5f5f5; color: #9e9e9e; }
+        
+        .race-title { font-size: 1.05rem; font-weight: 900; color: #222; margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .rating-box { display: flex; align-items: center; gap: 5px; font-size: 1rem; font-weight: 900; color: var(--main-color); }
+        .race-date-text { font-size: 0.75rem; color: #aaa; margin-top: 5px; font-weight: 500; }
+
+        /* 7. 페이징 최적화 */
+        .load-more-wrap { text-align: center; margin: 40px 0; }
+        .load-more-btn { padding: 12px 45px; border-radius: 50px; background: white; border: 1.5px solid #ddd; font-weight: 800; color: #666; cursor: pointer; transition: 0.2s; font-family: inherit; }
+        .load-more-btn:hover { border-color: var(--main-color); color: var(--main-color); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="search-filter-row">
+            <input type="text" id="race-search" placeholder="대회명 검색..." oninput="handleSearch()">
+            <div class="mini-filter">
+                <div class="mini-chip" onclick="handleFilter('전체', this)">전체</div>
+                <div class="mini-chip active" id="default-chip" onclick="handleFilter('평가가능', this)">평가가능</div>
+                <div class="mini-chip" onclick="handleFilter('평가완료', this)">평가완료</div>
+                <div class="mini-chip" onclick="handleFilter('국내', this)">국내</div>
+                <div class="mini-chip" onclick="handleFilter('해외', this)">해외</div>
+            </div>
+        </div>
+
+        <div class="sort-row">
+            <span class="sort-link active" id="sort-date" onclick="handleSort('date')">최신순</span>
+            <span class="sort-link" id="sort-rating" onclick="handleSort('rating')">평점순</span>
+        </div>
+
+        <div id="race-list" class="race-grid">
+            <div id="status-msg" style="grid-column: 1/-1; text-align: center; padding: 100px 0; color: #ccc;">
+                <i class="fa-solid fa-circle-notch fa-spin fa-2x"></i><br><br>대회 정보를 안전하게 로딩 중입니다...
+            </div>
+        </div>
+
+        <div class="load-more-wrap" id="load-more-area" style="display:none;">
+            <button class="load-more-btn" onclick="increaseLimit()">[대회 더보기]</button>
+        </div>
+    </div>
+
+    <script>
+        const _supabase = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+        let rawRaces = []; let filteredRaces = [];
+        let limitCount = 10;
+        let filterState = '평가가능'; let sortState = 'date';
+
+        async function init() {
+            try {
+                // [PGRST201 해결] 테이블 조인 없이 개별 호출 후 프론트에서 병합
+                const [raceRes, reviewRes] = await Promise.all([
+                    _supabase.from('schedules').select('*'),
+                    _supabase.from('reviews').select('*') 
+                ]);
+
+                if (raceRes.error) throw raceRes.error;
+
+                const today = new Date(); today.setHours(0,0,0,0);
+                const allReviews = reviewRes.data || [];
+
+                rawRaces = raceRes.data.map(race => {
+                    // 2, 8. 4대 지표 평균 계산 (코스, 운영, 기념품, 가성비)
+                    const raceReviews = allReviews.filter(rev => rev.race_id === race.id);
+                    let avg = 0;
+                    if (raceReviews.length > 0) {
+                        const sum = raceReviews.reduce((acc, r) => 
+                            acc + (r.course + r.management + r.souvenirs + r.cost_effective), 0);
+                        avg = (sum / (raceReviews.length * 4)).toFixed(1);
+                    }
+
+                    // 3. D+7 평가 가능 로직
+                    const rDate = new Date(race.race_date); rDate.setHours(0,0,0,0);
+                    const diffDays = Math.floor((today - rDate) / (1000 * 60 * 60 * 24));
+                    
+                    let status = "진행 예정";
+                    if (diffDays >= 0 && diffDays <= 7) status = "평가가능";
+                    else if (diffDays > 7) status = "평가완료";
+
+                    return { ...race, score: parseFloat(avg), status };
+                });
+
+                applyAllProcesses();
+            } catch (err) { 
+                console.error("Critical Error:", err);
+                document.getElementById('status-msg').innerHTML = `<span style="color:var(--main-color);">데이터를 불러오지 못했습니다. DB 테이블명을 확인해주세요.</span>`;
+            }
+        }
+
+        function handleFilter(val, el) {
+            filterState = val;
+            document.querySelectorAll('.mini-chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            limitCount = 10;
+            applyAllProcesses();
+        }
+
+        function handleSort(val) {
+            sortState = val;
+            document.querySelectorAll('.sort-link').forEach(l => l.classList.remove('active'));
+            document.getElementById(`sort-${val}`).classList.add('active');
+            applyAllProcesses();
+        }
+
+        function handleSearch() { limitCount = 10; applyAllProcesses(); }
+
+        function applyAllProcesses() {
+            const kw = document.getElementById('race-search').value.toLowerCase();
+            let result = rawRaces.filter(r => r.title.toLowerCase().includes(kw));
+
+            // 5. 필터 로직
+            if (filterState === '평가가능') result = result.filter(r => r.status === '평가가능');
+            else if (filterState === '평가완료') result = result.filter(r => r.status === '평가완료');
+            else if (filterState === '국내') result = result.filter(r => r.is_domestic);
+            else if (filterState === '해외') result = result.filter(r => !r.is_domestic);
+
+            // 4. 정렬 로직
+            if (sortState === 'date') result.sort((a,b) => new Date(b.race_date) - new Date(a.race_date));
+            else result.sort((a,b) => b.score - a.score);
+
+            filteredRaces = result;
+            render();
+        }
+
+        function increaseLimit() { limitCount += 10; render(); }
+
+        function render() {
+            const listEl = document.getElementById('race-list');
+            const batch = filteredRaces.slice(0, limitCount);
+            
+            if (batch.length === 0) {
+                listEl.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:80px 0; color:#ccc; font-weight:700;">해당되는 대회가 없습니다.</div>`;
+                document.getElementById('load-more-area').style.display = 'none';
+                return;
+            }
+
+            listEl.innerHTML = batch.map(r => `
+                <div class="race-card" onclick="location.href='race_detail.html?id=${r.id}'">
+                    <div class="poster-wrapper">
+                        <img src="${r.poster_url || 'https://via.placeholder.com/300x450'}" class="poster-img">
+                    </div>
+                    <div class="race-info">
+                        <div class="status-badge ${r.status === '평가가능' ? 'status-rateable' : 'status-closed'}">
+                            ${r.status === '평가가능' ? '평가 가능' : (r.status === '평가완료' ? '평가 마감' : '진행 예정')}
+                        </div>
+                        <div class="race-title">${r.title}</div>
+                        <div class="rating-box">
+                            <i class="fa-solid fa-star" style="font-size:0.8rem;"></i>
+                            <span>${r.score.toFixed(1)}</span>
+                        </div>
+                        <div class="race-date-text">대회일자 : ${r.race_date}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('load-more-area').style.display = (limitCount < filteredRaces.length) ? 'block' : 'none';
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
